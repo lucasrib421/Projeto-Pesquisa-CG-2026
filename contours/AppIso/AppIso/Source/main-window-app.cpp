@@ -1669,7 +1669,7 @@ ScalarField2 fbm(int w, int h, double lambda = 1, const Box2& b = Box2(.5))
 
 ScalarField2 user_defined(int x, int y, QString name, Qt::TransformationMode transformMode = Qt::SmoothTransformation)
 {
-	QImage i("../images/input/" + name);
+	QImage i("../Images/input/" + name);
 	ScalarField2 sf(i.scaled(x, y, Qt::IgnoreAspectRatio, transformMode));
 	sf.Normalize();
 	sf.Symmetry(false, true);
@@ -1952,10 +1952,10 @@ void MainWindow::GenerateFigure1(const QString& prefix)
 	int nb_isos = 20;
 
 	QVector<QString> masks = {
-		"../images/input/teaser-1.png",
-		//"../images/input/teaser-2-a.png",
-		"../images/input/teaser-2-b.png",
-		"../images/input/teaser-3.png",
+		"../Images/input/teaser-1.png",
+		//"../Images/input/teaser-2-a.png",
+		"../Images/input/teaser-2-b.png",
+		"../Images/input/teaser-3.png",
 	};
 	
 	ChangeBoxes(b);
@@ -1992,9 +1992,9 @@ void MainWindow::GenerateFigure1(const QString& prefix)
 
 	// Old teaser
 	//QVector<QString> masks = {
-	//	"../images/input/teaser-old-1.png", // Mesas
-	//	"../images/input/teaser-old-2.png", // Coastlines
-	//	"../images/input/teaser-old-3.png", // RidgeLines
+	//	"../Images/input/teaser-old-1.png", // Mesas
+	//	"../Images/input/teaser-old-2.png", // Coastlines
+	//	"../Images/input/teaser-old-3.png", // RidgeLines
 	//};
 	//
 	//QVector<HistogramD> histograms = {
@@ -2131,7 +2131,7 @@ void MainWindow::GenerateFigure7(const QString& prefix)
 		dir.mkpath(".");
 
 	double radius = 12.5;
-	ScalarField2 m(Box2(1000, 500), QImage("../images/input/mask_2_bis.png").flipped());
+	ScalarField2 m(Box2(1000, 500), QImage("../Images/input/mask_2_bis.png").flipped());
 	ArticleUtils::GraphConstructionDebug(m, radius, prefix);
 }
 
@@ -2183,7 +2183,7 @@ void MainWindow::GenerateFigure11(const QString& prefix)
 	int nb_particles = 3000;
 	
 	ChangeBoxes(b);
-	ChangeMaskFromFile("../images/input/mask.png");
+	ChangeMaskFromFile("../Images/input/mask.png");
 	ChangeHistogramFromFile("../Data/dems/rockies_zoom_breach.png", nb_isos);
 	ChangeEstimatedNbParticles(nb_particles);
 	
@@ -2191,7 +2191,7 @@ void MainWindow::GenerateFigure11(const QString& prefix)
 	ExportMaskSVG(prefix + "river_mask.svg");
 	
 	// User noise
-	ChangeNoiseFromFile("../images/input/proba.png", 4);
+	ChangeNoiseFromFile("../Images/input/proba.png", 4);
 	ExportNoise(prefix + "river_noise.png");
 	
 	Generate(1);
@@ -2220,7 +2220,7 @@ void MainWindow::GenerateFigure12(const QString& prefix)
 
 	// Masque 3 zones
 	ChangeBoxes(b);
-	ChangeMaskFromFile("../images/input/mask_boundaries.png", 3);
+	ChangeMaskFromFile("../Images/input/mask_boundaries.png", 3);
 	ChangeEstimatedNbParticles(nb_particles);
 
 	CreateGenerationZones();
@@ -2244,7 +2244,7 @@ void MainWindow::GenerateFigure13And14(const QString& prefix)
 	double max_height = 4500;
 
 	ChangeBoxes(b);
-	ChangeMaskFromFile("../images/input/multi_mask.png", 3);
+	ChangeMaskFromFile("../Images/input/multi_mask.png", 3);
 	ChangeHistogramFromFile("../Data/dems/rockies_zoom_breach.png", nb_isos);
 	ChangeNoise(uniform(256, 256));
 	ChangeEstimatedNbParticles(nb_particles);
@@ -2611,7 +2611,7 @@ void MainWindow::GenerateFigure21(const QString& prefix)
 
 	QVector<QString> masks =
 	{
-		"../images/input/multi_mask_2.png",
+		"../Images/input/multi_mask_2.png",
 	};
 
 	QVector<QString> histos =
@@ -2676,10 +2676,10 @@ void MainWindow::GenerateFigure22(const QString& prefix)
 		//"../Data/dems/colorado.png",
 		"../Data/dems/alps.png",
 		"../Data/dems/ruapehu.png",
-		"../images/input/mask_lambda.png",
-		"../images/input/mask_desert.png",
-		"../images/input/mask_triple.png",
-		"../images/input/multi_mask_2.png",
+		"../Images/input/mask_lambda.png",
+		"../Images/input/mask_desert.png",
+		"../Images/input/mask_triple.png",
+		"../Images/input/multi_mask_2.png",
 	};
 
 	QVector<variant<int, QString>> histos =
@@ -2853,7 +2853,7 @@ void MainWindow::GenerateFigure25AndTable1(const QString& prefix)
 
 	Box2 b(15000);
 	QString maskFile = "../Data/dems/reunion.png";
-	//QString maskFile = "../images/input/circles2.png";
+	//QString maskFile = "../Images/input/circles2.png";
 	int nb_tests = 20;
 	//int nb_tests = 1;
 
@@ -3016,7 +3016,7 @@ void MainWindow::GenerateFigure26(const QString& prefix)
 	int nb_particles = 10000;
 	double min_height = 0;
 	double max_height = 5000;
-	QString mask = "../images/input/multi_mask_2.png";
+	QString mask = "../Images/input/multi_mask_2.png";
 	QString histo = "../Data/dems/rockies_zoom_breach.png";
 
 	ChangeBoxes(b);
@@ -3082,9 +3082,9 @@ void MainWindow::GenerateFigure27(const QString& prefix)
 	Box2 b(15000);
 
 	QVector<QString> masks = {
-		"../images/input/editing-1.png",
-		"../images/input/editing-2.png",
-		"../images/input/editing-3.png",
+		"../Images/input/editing-1.png",
+		"../Images/input/editing-2.png",
+		"../Images/input/editing-3.png",
 	};
 
 	QString histo1file = "../Data/dems/reunion.png";
@@ -3758,7 +3758,7 @@ void MainWindow::GenerateFigurePresentation4(const QString& prefix)
 	ChangeBoxes(b);
 	// Masque 3 zones
 	ChangeEstimatedNbParticles(nb_particles);
-	ChangeMaskFromFile("../images/input/mask_boundaries.png", 3);
+	ChangeMaskFromFile("../Images/input/mask_boundaries.png", 3);
 	ChangeHistogramFromFile("../Data/dems/rockies_zoom_breach.png", nb_isos);
 	ChangeNoise(uniform(256, 256));
 
@@ -3795,7 +3795,7 @@ void MainWindow::GenerateFigurePresentation5(const QString& prefix)
 
 	ChangeBoxes(b);
 	ChangeEstimatedNbParticles(nb_particles);
-	ChangeMaskFromFile("../images/input/teaser-old-2.png", 1);
+	ChangeMaskFromFile("../Images/input/teaser-old-2.png", 1);
 	ChangeHistogramFromFile("../Data/dems/rockies_zoom_breach.png", nb_isos);
 	ChangeNoise(fbm(256, 256, 10));
 	ChangeHeights(min_height, max_height);
@@ -3915,7 +3915,7 @@ void MainWindow::GenerateFigurePresentation6(const QString& prefix)
 	b = Box2(15000);
 
 	ChangeBoxes(b);
-	ChangeMaskFromFile("../images/input/multi_mask_2.png", 3);
+	ChangeMaskFromFile("../Images/input/multi_mask_2.png", 3);
 	ChangeNoise(uniform(256, 256));
 	ChangeHistogramFromFile("../Data/dems/rockies_zoom_breach.png", nb_isos);
 
