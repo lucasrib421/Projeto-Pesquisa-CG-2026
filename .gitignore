@@ -1,2 +1,5 @@
 # Saída de compilação (gerada por scripts/setup.sh)
 build/
+
+# Grafos completos (~17 MB cada); regeneráveis e idênticos via scripts/baseline-fig11.sh
+results/**/*_eden.svg

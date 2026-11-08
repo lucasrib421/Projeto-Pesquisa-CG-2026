@@ -24,6 +24,8 @@ contours/        código do artigo (C++/Qt), importado intacto e depois modifica
 scripts/
   setup.sh       verifica dependências e compila em build/
   run.sh         executa o programa com o ambiente correto
+  baseline-fig11.sh  reproduz a baseline (Figura 11 do artigo)
+results/         resultados dos experimentos
 build/           saída da compilação (não versionada)
 ```
 
@@ -47,14 +49,30 @@ bash scripts/setup.sh
 bash scripts/run.sh
 ```
 
-O `run.sh` define duas variáveis de ambiente (não é preciso configurar nada à mão):
+O `run.sh` define estas variáveis de ambiente (não é preciso configurar nada à mão):
 
 | Variável | Por quê |
 |---|---|
 | `QT_QPA_PLATFORM=xcb` | O GLEW do Ubuntu usa GLX. Sob Wayland (WSLg), o Qt cria um contexto EGL e o programa fecha com `GLEW Error` |
 | `GALLIUM_DRIVER=d3d12` (só no WSL) | Sem ela, o Mesa renderiza na CPU (llvmpipe) em vez da GPU |
+| `QT_HASH_SEED=0` | O Qt sorteia a ordem dos `QSet` a cada execução, e o Eden Growth percorre um `QSet` ao sortear nós. Sem ela, a mesma entrada gera resultados diferentes |
 
 Para o uso da interface, veja [contours/TUTORIAL.md](contours/TUTORIAL.md).
+
+## Reproduzir a baseline (Figura 11)
+
+```bash
+bash scripts/baseline-fig11.sh
+```
+
+Gera em `results/baseline/fig11/` a Figura 11 do artigo: um rio definido pelo mapa de probabilidade P, comparado com um mapa uniforme. Leva cerca de 8 s. Parâmetros (definidos em `GenerateFigure11`): domínio `Box2(500)` (de −500 a 500, 1000 unidades de lado), ~3000 partículas, 12 isolinhas, máscara `Images/input/mask.png`, mapa P `Images/input/proba.png` (expoente 4), histograma de `Data/dems/rockies_zoom_breach.png`. Gerador aleatório com semente 239 (padrão do código) e `QT_HASH_SEED=0`: execuções repetidas geram arquivos idênticos.
+
+| Arquivo | Conteúdo |
+|---|---|
+| `river_mask.svg` | Máscara (região do terreno) |
+| `river_noise.png`, `uniform_noise.png` | Mapas de probabilidade P: com rio e uniforme |
+| `river_isos.svg`, `uniform_isos.svg` | Isolinhas geradas |
+| `river_eden.svg`, `uniform_eden.svg` | Grafo com a ordem de crescimento (~17 MB cada; não versionados, regenerados pelo script) |
 
 ## Modificações em relação ao original
 
@@ -67,6 +85,8 @@ git diff original -- contours/
 | Commit | Mudança |
 |---|---|
 | Correções de compatibilidade com Linux | 3 correções para GCC/Qt 6.10, sem mudança de comportamento (detalhes na mensagem do commit) |
+| Caminhos `../images/` → `../Images/` | 26 caminhos em minúsculas que falhavam no Linux (a imagem carregava vazia, sem erro) |
+| Modo em lote `--figure 11 --out <pasta>` | Gera uma única figura do artigo e fecha (`main.cpp`); sem a opção, comportamento original |
 
 ## Problemas conhecidos
 
@@ -83,6 +103,7 @@ git diff original -- contours/
 | Claude Code | Diagnóstico de problemas de ambiente no WSL (links de dados, GLEW/Wayland, GPU) e scripts `setup.sh`/`run.sh` | Execução do programa pelos scripts |
 | Claude Code | Apoio na leitura do artigo e no levantamento das limitações | Conferência com as seções 6.5 e 6.6 do artigo |
 | Claude Code | Rascunho dos slides do Checkpoint 1 | Revisão e apresentação pela equipe |
+| Claude Code | Modo em lote, correção dos caminhos, diagnóstico da não reprodutibilidade (`QT_HASH_SEED`) e script da baseline | Execuções repetidas com comparação byte a byte dos arquivos gerados |
 | NotebookLM (Google) | Organização e estudo do artigo | Conferência com o texto do artigo |
 
 As decisões de projeto (escolha do problema, proposta, métricas) foram tomadas pela equipe.
