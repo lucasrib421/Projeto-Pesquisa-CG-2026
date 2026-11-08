@@ -23,6 +23,11 @@ if grep -qi microsoft /proc/version 2>/dev/null && [ -e /dev/dxg ]; then
     export GALLIUM_DRIVER="${GALLIUM_DRIVER:-d3d12}"
 fi
 
+# Reprodutibilidade: o Qt 6 sorteia a semente do hash de QSet/QHash a cada
+# processo, e o algoritmo percorre QSets ao sortear nós. Sem isto, duas
+# execuções com a mesma semente geram grafos e isolinhas diferentes.
+export QT_HASH_SEED="${QT_HASH_SEED:-0}"
+
 # Shaders e caminhos "../Data/..." são relativos a esta pasta.
 cd "$REPO_DIR/contours/AppIso/AppIso"
 exec "$BIN" "$@"
