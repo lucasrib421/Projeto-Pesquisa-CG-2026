@@ -145,7 +145,8 @@ public:
 		int max_isos = -1;
 	};
 
-	QGraphicsScene* ToScene(const DisplayOptions& = DisplayOptions()) const;
+	QGraphicsScene* ToScene(const DisplayOptions&) const;
+	QGraphicsScene* ToScene() const;
 
 public:
 	// Provide range-based for loops
@@ -195,4 +196,9 @@ inline QSet<int> IsoLines::Children(int i) const
 inline QSet<int> IsoLines::Roots() const
 {
 	return roots;
+}
+
+inline QGraphicsScene* IsoLines::ToScene() const
+{
+	return ToScene(DisplayOptions());
 }

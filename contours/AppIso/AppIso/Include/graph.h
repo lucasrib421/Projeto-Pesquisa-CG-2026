@@ -125,7 +125,8 @@ public:
 		double maxVal = Math::Infinity;
 	};
 
-	QGraphicsScene* ToScene(const DisplayOptions& = DisplayOptions()) const;
+	QGraphicsScene* ToScene(const DisplayOptions&) const;
+	QGraphicsScene* ToScene() const;
 
 protected:
 	bool ExteriorPointInsideMask(int vi) const;
@@ -209,4 +210,9 @@ inline bool GraphPoisson::IsBorder(int i) const
 inline Vector2 GraphPoisson::Position(int i) const
 {
 	return topology->Vertex(i);
+}
+
+inline QGraphicsScene* GraphPoisson::ToScene() const
+{
+	return ToScene(DisplayOptions());
 }

@@ -56,7 +56,7 @@ class MainWindow : public QMainWindow {
 		double pbr_mse_deposition = 1;
 
 		// Params for histo
-		GenericPalette* histogram_palette = new Palette({ Qt::white });
+		GenericPalette* histogram_palette = new Palette(QVector<QColor>{ Qt::white });
 		double histogram_width = 1000;
 		double histogram_height = 500;
 

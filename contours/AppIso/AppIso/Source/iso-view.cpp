@@ -1,6 +1,6 @@
 #include "iso-view.h"
 
-#include <QtWidgets/QScrollbar>
+#include <QtWidgets/QScrollBar>
 #include <QtGui/QMouseEvent>
 
 using namespace std;
