@@ -133,8 +133,10 @@ namespace
  * \param riverFile CSV "x,y,elevation" from mouth to source. For the baseline it is only used to measure.
  * \param seed Seed of the random generators (239 = default of the original code)
  * \param prefix Output folder
+ * \param spreadDelayLevels "channel" only: delay before a river node spreads the growth, in height levels
+ *        (one level = number of nodes / number of histogram bins ranks); negative = never
  */
-bool MainWindow::RunRiverExperiment(const QString& mode, const QString& riverFile, int seed, const QString& prefix)
+bool MainWindow::RunRiverExperiment(const QString& mode, const QString& riverFile, int seed, const QString& prefix, double spreadDelayLevels)
 {
 	IsoVectoGenerationRiver::Mode genMode;
 	const bool riverInP = (mode == "baseline");
@@ -223,6 +225,8 @@ bool MainWindow::RunRiverExperiment(const QString& mode, const QString& riverFil
 	// Growth
 	timer.restart();
 	IsoVectoGenerationRiver gen(g, m_generation_noise, genMode, seeds, seed);
+	const int spreadDelayRanks = spreadDelayLevels < 0 ? -1 : int(std::lround(spreadDelayLevels * n / h.GetSize()));
+	gen.SetSpreadDelay(spreadDelayRanks);
 	gen.Generate();
 	qint64 msGrowth = timer.elapsed();
 	IsoVectoGenerationRiver::Stats stats = gen.GetStats();
@@ -283,6 +287,8 @@ bool MainWindow::RunRiverExperiment(const QString& mode, const QString& riverFil
 		QTextStream out(&infoFile);
 		out << "mode=" << mode << '\n'
 			<< "seed=" << seed << '\n'
+			<< "spread_delay_levels=" << spreadDelayLevels << '\n'
+			<< "spread_delay_ranks=" << spreadDelayRanks << '\n'
 			<< "river_file=" << riverFile << '\n'
 			<< "nodes=" << n << '\n'
 			<< "poisson_radius=" << g.Radius() << '\n'

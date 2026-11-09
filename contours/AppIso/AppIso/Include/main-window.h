@@ -123,7 +123,7 @@ class MainWindow : public QMainWindow {
 	void GenerateFigurePresentation6(const QString&);
 
 	// River experiment (river-experiment.cpp)
-	bool RunRiverExperiment(const QString& mode, const QString& riverFile, int seed, const QString& prefix);
+	bool RunRiverExperiment(const QString& mode, const QString& riverFile, int seed, const QString& prefix, double spreadDelayLevels = -1);
 
 	// Parameters
 	void ResetHistogramView();

@@ -16,9 +16,10 @@ int main(int argc, char *argv[])
 	QCommandLineOption experimentOption("experiment", "Run the river experiment and quit: baseline, control, reserve, passive or channel.", "mode");
 	QCommandLineOption riverOption("river", "River CSV for --experiment: x,y in meters, elevation normalized to [0,1], from mouth to source.", "file");
 	QCommandLineOption seedOption("seed", "Random seed for --experiment (default: 239, as the original code).", "n", "239");
+	QCommandLineOption delayOption("spread-delay", "For --experiment channel: height levels before a river node spreads the growth (default: -1 = never).", "levels", "-1");
 	QCommandLineOption outOption("out", "Output folder (default: Figures/).", "folder", "Figures/");
 	QCommandLineOption stayOption("stay", "Keep the window open after --figure or --experiment.");
-	parser.addOptions({ figureOption, experimentOption, riverOption, seedOption, outOption, stayOption });
+	parser.addOptions({ figureOption, experimentOption, riverOption, seedOption, delayOption, outOption, stayOption });
 	parser.process(app);
 
 	const bool figure = parser.isSet(figureOption);
@@ -43,6 +44,13 @@ int main(int argc, char *argv[])
 		qCritical() << "Invalid seed:" << parser.value(seedOption);
 		return 2;
 	}
+	bool delayOk;
+	const double spreadDelay = parser.value(delayOption).toDouble(&delayOk);
+	if (!delayOk)
+	{
+		qCritical() << "Invalid spread delay:" << parser.value(delayOption);
+		return 2;
+	}
 	const bool stay = parser.isSet(stayOption);
 
 	MainWindow mainWin;
@@ -64,7 +72,7 @@ int main(int argc, char *argv[])
 				mainWin.GenerateFigure11(outFolder);
 				qInfo() << "Figure 11 written to" << outFolder;
 			}
-			else if (mainWin.RunRiverExperiment(parser.value(experimentOption), parser.value(riverOption), seed, outFolder))
+			else if (mainWin.RunRiverExperiment(parser.value(experimentOption), parser.value(riverOption), seed, outFolder, spreadDelay))
 				qInfo() << "Experiment written to" << outFolder;
 			else
 				exitCode = 1;

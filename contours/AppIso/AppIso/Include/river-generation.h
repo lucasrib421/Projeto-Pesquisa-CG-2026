@@ -13,9 +13,10 @@
  *     their target, so they get exactly the requested rank;
  *   - Mode::Passive: river nodes are not blocked; they get the rank of
  *     whichever comes first, the natural growth or their target;
- *   - Mode::Channel: as Reserve, but an activated river node does not join
- *     the growth front: the growth does not spread from the river, so the
- *     banks keep their natural rank and the riverbed is incised below them;
+ *   - Mode::Channel: as Reserve, but an activated river node joins the growth
+ *     front only after a delay (SetSpreadDelay; by default never): meanwhile
+ *     the growth does not spread from the river, so the banks keep a higher
+ *     rank and the riverbed is incised below them;
  *   - Mode::None: no seeds; same algorithm as IsoVectoGenerationV1.
  *
  * The original IsoVectoGenerationV1 is left untouched: the growth loop is
@@ -41,6 +42,10 @@ public:
 
 	IsoVectoGenerationRiver(const GraphPoisson&, const ScalarField2&, Mode, const QVector<Seed>&, int seed);
 
+	// Channel mode only: an activated river node joins the growth front after this many ranks.
+	// 0 behaves as Reserve; -1 (default) never joins.
+	void SetSpreadDelay(int ranks);
+
 	void Generate();
 	Stats GetStats() const;
 
@@ -48,6 +53,8 @@ protected:
 	void PreProcessRiver();
 	void ActivateSeed(int node, bool forced);
 	void ActivateSeedsOnTarget();
+	void ReleaseDelayed();
+	bool ReleaseNextDelayed();
 	bool ForceNextSeed();
 	bool GrowOneNode();
 	int PickBorderNode();
@@ -55,10 +62,18 @@ protected:
 	Mode mode;
 	QVector<Seed> seeds;   // sorted by target rank
 	int nextSeed = 0;
-	Random rNeighbour;     // same role as the static generator of IsoVectoGenerationV1::ChooseNextNode
+	int spreadDelay = -1;
+	QVector<QPair<int, int>> delayed; // (release rank, node), in increasing release rank
+	int nextDelayed = 0;
+	Random rNeighbour;    // same role as the static generator of IsoVectoGenerationV1::ChooseNextNode
 	Random rBorder;        // same role as the static generator of IsoVectoGenerationV1::GetRandomNode
 	Stats stats;
 };
+
+inline void IsoVectoGenerationRiver::SetSpreadDelay(int ranks)
+{
+	spreadDelay = ranks;
+}
 
 inline IsoVectoGenerationRiver::Stats IsoVectoGenerationRiver::GetStats() const
 {

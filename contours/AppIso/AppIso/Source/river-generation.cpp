@@ -28,14 +28,16 @@ void IsoVectoGenerationRiver::Generate()
 
 	while (nbAssigned != R.Size())
 	{
+		ReleaseDelayed();
 		ActivateSeedsOnTarget();
 		if (nbAssigned == R.Size())
 			break;
 
 		if (!GrowOneNode())
 		{
-			// Empty front: only possible while river nodes are still reserved
-			if (!ForceNextSeed())
+			// Empty front: only possible while river nodes are still reserved or delayed.
+			// Release a delayed river node first, then force the next reserved one.
+			if (!ReleaseNextDelayed() && !ForceNextSeed())
 			{
 				qWarning() << "[River] Impossible to keep growing:" << R.Size() - nbAssigned << "nodes without rank";
 				break;
@@ -50,6 +52,8 @@ void IsoVectoGenerationRiver::PreProcessRiver()
 	nbAssigned = 0;
 	lastChosen = -1;
 	nextSeed = 0;
+	delayed.clear();
+	nextDelayed = 0;
 	stats = Stats();
 
 	if (mode == Mode::Reserve || mode == Mode::Channel)
@@ -77,10 +81,12 @@ void IsoVectoGenerationRiver::ActivateSeed(int node, bool forced)
 	if (R[node] == INITIAL_VALUE || R[node] == RESERVED_VALUE)
 	{
 		R[node] = GetNextHeight();
-		// In channel mode the river does not seed the growth of its banks,
-		// unless it is forced to unblock an empty front
-		if (mode != Mode::Channel || forced)
+		// In channel mode the river seeds the growth of its banks only after spreadDelay ranks
+		// (never if -1), unless it is forced to unblock an empty front
+		if (mode != Mode::Channel || forced || spreadDelay == 0)
 			borders.insert(node);
+		else if (spreadDelay > 0)
+			delayed.append({ nbAssigned + spreadDelay, node });
 		if (forced)
 			stats.forcedEarly++;
 		else
@@ -90,6 +96,26 @@ void IsoVectoGenerationRiver::ActivateSeed(int node, bool forced)
 	{
 		stats.alreadyAssigned++;
 	}
+}
+
+// Delayed river nodes whose release rank is reached join the growth front
+void IsoVectoGenerationRiver::ReleaseDelayed()
+{
+	while (nextDelayed < delayed.size() && delayed[nextDelayed].first <= nbAssigned)
+	{
+		borders.insert(delayed[nextDelayed].second);
+		++nextDelayed;
+	}
+}
+
+bool IsoVectoGenerationRiver::ReleaseNextDelayed()
+{
+	if (nextDelayed >= delayed.size())
+		return false;
+
+	borders.insert(delayed[nextDelayed].second);
+	++nextDelayed;
+	return true;
 }
 
 void IsoVectoGenerationRiver::ActivateSeedsOnTarget()
