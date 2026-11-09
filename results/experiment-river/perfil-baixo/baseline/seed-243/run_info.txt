@@ -1,0 +1,17 @@
+mode=baseline
+seed=243
+river_file=../../../experiments/river-fig11-perfil-baixo.csv
+nodes=3015
+poisson_radius=5.94401
+river_points=26
+river_points_raised_D2=0
+river_nodes=47
+river_gaps_D4=0
+seeds_activated_on_target=0
+seeds_already_assigned=0
+seeds_forced_early=0
+ms_graph=42
+ms_growth=14
+ms_isolines=218
+histogram_keys=0.001;0.0911052;0.18121;0.271316;0.361421;0.451526;0.541631;0.631736;0.721841;0.811947;0.902052;0.992157
+histogram_counts=302;280;357;335;358;373;332;286;208;121;45;18

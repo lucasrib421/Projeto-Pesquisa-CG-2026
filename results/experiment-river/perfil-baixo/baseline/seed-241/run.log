@@ -1,0 +1,4 @@
+Dropped Escape call with ulEscapeCode : 0x03007703
+[Zones graph] nb particles: 3022
+[River] "baseline" seed 241 : 50 river nodes, 0 gaps, 0 on target, 0 already assigned, 0 forced
+Experiment written to "../../../results/experiment-river/perfil-baixo/baseline/seed-241/"
