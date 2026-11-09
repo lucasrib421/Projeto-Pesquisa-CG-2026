@@ -28,7 +28,8 @@ scripts/
   experiment-river.sh  experimento do rio (baseline × proposta, várias sementes)
   metrics.py     métricas do experimento (summary.csv, summary.md)
   compare_page.py  página HTML de comparação lado a lado
-experiments/     entradas dos experimentos (traçado do rio em CSV, dois perfis)
+  make_profile.py  gera o perfil de leito que acompanha o terreno
+experiments/     entradas dos experimentos (traçado do rio em CSV, três perfis)
 results/         resultados dos experimentos
 build/           saída da compilação (não versionada)
 ```
@@ -84,16 +85,22 @@ Gera em `results/baseline/fig11/` a Figura 11 do artigo: um rio definido pelo ma
 bash scripts/experiment-river.sh
 ```
 
-Roda 2 perfis de leito × 4 modos × 5 sementes (239 a 243), cerca de 6 minutos, com a mesma máscara, histograma e ~3000 partículas da Figura 11:
+Roda 3 perfis de leito × 5 modos × 5 sementes (239 a 243), cerca de 10 minutos, com a mesma máscara, histograma e ~3000 partículas da Figura 11. Para rodar só parte: `PROFILES="terreno" MODES="channel" bash scripts/experiment-river.sh`.
 
 | Modo | Rio definido por | Mapa P |
 |---|---|---|
 | `baseline` | Pintura no mapa P (método original, Figura 11) | `proba.png` |
 | `control` | Nenhum rio (isola o efeito do rio) | Uniforme |
-| `reserve` | CSV com elevação explícita; nós do rio bloqueados até a senha-alvo (decisão D1-A) | Uniforme |
-| `passive` | CSV com elevação explícita; nó ativado na senha-alvo ou antes, se o crescimento chegar (D1-B) | Uniforme |
+| `reserve` | CSV com elevação explícita; nós do rio bloqueados até a senha-alvo e depois sementes do crescimento (decisão D1-A) | Uniforme |
+| `passive` | CSV; nó ativado na senha-alvo ou antes, se o crescimento chegar (D1-B) | Uniforme |
+| `channel` | CSV; como `reserve`, mas o crescimento **não se espalha** a partir do rio | Uniforme |
 
-Perfis do leito (mesmo traçado, braço esquerdo do rio da Figura 11): `experiments/river-fig11-perfil-alto.csv` (0 na foz, 0,40 na nascente) e `experiments/river-fig11-perfil-baixo.csv` (0 a 0,15). Na `baseline` e no `control` o CSV só serve para medir.
+Perfis do leito, todos sobre o mesmo traçado (braço esquerdo do rio da Figura 11):
+- `experiments/river-fig11-perfil-alto.csv`: linear, 0 na foz e 0,40 na nascente;
+- `experiments/river-fig11-perfil-baixo.csv`: linear, 0 a 0,15;
+- `experiments/river-fig11-perfil-terreno.csv`: altura natural ao longo do traçado (média de 5 execuções do controle) menos 0,1, gerado por `scripts/make_profile.py`.
+
+Na `baseline` e no `control`, o CSV só serve para medir.
 
 Para ver os resultados, abra `results/experiment-river/index.html` no navegador (isolinhas e terreno lado a lado, seletores de perfil e semente, traçado do rio por cima). No WSL:
 
@@ -101,32 +108,42 @@ Para ver os resultados, abra `results/experiment-river/index.html` no navegador 
 explorer.exe "$(wslpath -w results/experiment-river/index.html)"
 ```
 
-Resultados completos em `results/experiment-river/perfil-<alto|baixo>/summary.md`. Resumo (média entre as 5 sementes; alturas normalizadas em [0, 1], uma caixa do histograma ≈ 0,09):
+Resultados completos em `results/experiment-river/perfil-<alto|baixo|terreno>/summary.md`. Resumo (média entre as 5 sementes; alturas normalizadas em [0, 1], uma caixa do histograma ≈ 0,09; baseline e controle não dependem do perfil):
 
-| Perfil | Modo | Nós sem vizinho mais baixo | Erro médio no leito | Piso de quantização | Rebaixamento do corredor 0–60 m (vs. controle) |
+| Perfil | Modo | Nós sem vizinho mais baixo | Erro médio no leito | Leito entalhado (%) | Rebaixamento do corredor 0–60 m |
 |---|---|---|---|---|---|
-| — | baseline | 0 | 0,102 (alto) / 0,041 (baixo) | 0,021 / 0,023 | +0,161 |
-| alto | reserve | 0 | 0,021 | 0,021 | +0,068 |
-| alto | passive | 0 | 0,024 | 0,021 | +0,069 |
-| baixo | reserve | 0 | 0,023 | 0,023 | +0,160 |
-| baixo | passive | 0 | 0,023 | 0,023 | +0,165 |
+| — | baseline | 0 | — | 0,4 | +0,161 |
+| — | control | 0 | — | 2,5 | — |
+| alto | reserve | 0 | 0,021 | 0,0 | +0,068 |
+| alto | passive | 0 | 0,024 | 0,4 | +0,069 |
+| alto | channel | 0 | 0,021 | 68,3 | −0,039 |
+| baixo | reserve | 0 | 0,023 | 7,0 | +0,160 |
+| baixo | passive | 0 | 0,023 | 7,5 | +0,165 |
+| baixo | channel | 0 | 0,023 | 92,1 | −0,024 |
+| terreno | reserve | 0 | 0,024 | 0,0 | +0,064 |
+| terreno | passive | 0 | 0,029 | 0,4 | +0,067 |
+| terreno | channel | 0 | 0,024 | 74,5 | −0,040 |
 
 O que os resultados mostram até aqui:
 - Nenhum modo cria nós sem vizinho mais baixo: a garantia do artigo (sem bacias endorreicas) se mantém com o rio explícito.
-- A proposta controla a altura do leito: o erro fica no piso de quantização (o menor possível com 12 alturas).
-- O rio rebaixa um **corredor** de ~60 a 100 m em volta dele, não só os próprios nós: ao ser ativado, ele vira semente, e os vizinhos recebem as senhas seguintes (mesma caixa de altura). Por isso o rio quase nunca fica abaixo das margens **imediatas** (coluna "por altura" no `summary.md`, perto de 0%), mas o corredor fica mais baixo.
-- A profundidade do vale depende do perfil pedido em relação ao terreno natural (~0,28 ao longo do traçado, no controle). Com o perfil alto, o vale é raso (+0,07, menos de uma caixa) e quase invisível; com o perfil baixo, é tão profundo quanto o da baseline (+0,16).
+- A proposta controla a altura do leito: o erro fica no piso de quantização (o menor possível com 12 alturas). O erro da baseline em relação aos perfis é de 0,04 a 0,10.
+- Há dois efeitos distintos, e cada variante produz um:
+  - **Corredor rebaixado** (`reserve`, `passive`, e também a `baseline`): o rio vira semente, o crescimento se espalha a partir dele e as margens recebem as senhas seguintes. O terreno desce numa faixa de ~60 a 100 m (até +0,16 com o perfil baixo, igual à baseline), mas o leito fica na mesma altura das margens: um lóbulo largo, sem a forma de vale (leito entalhado ~0%, inclusive na baseline).
+  - **Leito entalhado** (`channel`): o rio recebe a altura pedida, mas não semeia as margens, que ficam com a altura natural. O leito fica pelo menos um nível abaixo das margens em 68 a 92% dos nós, e o canal aparece no terreno. O corredor em volta não desce (fica levemente mais alto que no controle; hipótese: os nós reservados funcionam como parede e atrasam o crescimento ao redor).
+- Um vale de rio real combina os dois efeitos (canal entalhado dentro de um vale mais largo); nenhuma variante atual faz as duas coisas.
 
 Definições (em `scripts/metrics.py`):
 - **Nós sem vizinho mais baixo:** nós fora da costa sem vizinho de senha menor. É a garantia do artigo; deve ser 0.
-- **Erro no leito:** \|altura gerada − altura pedida\| nos nós do rio. Na baseline e no controle, mede a distância entre o terreno gerado e um perfil que esses modos não têm como receber.
+- **Erro no leito:** \|altura gerada − altura pedida\| nos nós do rio.
 - **Piso de quantização:** menor erro possível, porque o terreno só tem 12 alturas (uma por caixa do histograma).
-- **Perfil transversal:** altura média dos nós por faixa de distância até o rio. **Rebaixamento do corredor:** média das faixas 0–30 m e 30–60 m no controle menos a mesma média no modo, por semente.
-- **Abaixo das margens imediatas** (por senha e por altura): nó do rio mais baixo que todos os vizinhos fora do rio. A versão por senha pode ser alta enquanto a por altura é ~0%, porque senhas próximas caem na mesma caixa de altura.
+- **Leito entalhado:** nó do rio pelo menos um nível abaixo da média das margens laterais (nós a 20–60 m dele e a pelo menos 20 m do traçado). Mede a forma de vale: nos cruzamentos, a isolinha é empurrada rio acima.
+- **Isolinhas que cruzam o rio** (no `summary.md`): mudanças de altura entre nós consecutivos do rio.
+- **Perfil transversal** (no `summary.md`): altura média por faixa de distância até o rio. **Rebaixamento do corredor:** média das faixas 0–30 m e 30–60 m no controle menos a mesma média no modo, por semente.
+- **Abaixo das margens imediatas** (no `summary.md`, por senha e por altura): a versão por senha pode ser alta enquanto a por altura é ~0%, porque senhas próximas caem na mesma caixa de altura.
 
 Limitações conhecidas destes resultados preliminares:
-- O traçado tem a largura de um nó (~17 m entre nós vizinhos); a largura do vale vem só do crescimento em volta do rio. O rio pintado da baseline tem ~50 m.
-- Dois perfis lineares, escolhidos pela equipe; outros perfis ainda não foram testados.
+- O canal tem a largura de um nó (~17 m entre nós vizinhos); o rio pintado da baseline tem ~50 m.
+- O perfil `terreno` usa as alturas do próprio controle; os perfis lineares foram escolhidos pela equipe.
 - O traçado segue só o braço esquerdo do rio da Figura 11.
 - Métricas medidas nas alturas do grafo (12 níveis), não no terreno interpolado.
 
@@ -134,7 +151,7 @@ Limitações conhecidas destes resultados preliminares:
 
 | Decisão | Escolha atual |
 |---|---|
-| D1. Crescimento chega ao rio antes da hora | As duas opções implementadas (`reserve` e `passive`) para comparação |
+| D1. Crescimento chega ao rio antes da hora | Três variantes implementadas para comparação: `reserve`, `passive` e `channel` |
 | D2. Rio que "sobe" | Máximo acumulado da foz para a nascente (contado em `run_info.txt`) |
 | D3. Entrada | CSV `x,y,elevation`: metros no domínio `Box2(500)` e altura **normalizada [0, 1]**, da foz para a nascente |
 | D4. Linha → nós do grafo | Nó mais próximo a cada passo de r/4 ao longo da linha; buracos contados em `run_info.txt` |
@@ -143,7 +160,7 @@ Limitações conhecidas destes resultados preliminares:
 Para rodar um modo isolado (os caminhos são relativos a `contours/AppIso/AppIso`, a pasta de trabalho do `run.sh`; `--stay` mantém a janela aberta para ver o terreno em 3D):
 
 ```bash
-bash scripts/run.sh --experiment reserve --river ../../../experiments/river-fig11-perfil-baixo.csv --seed 239 --out ../../../results/teste/ --stay
+bash scripts/run.sh --experiment channel --river ../../../experiments/river-fig11-perfil-baixo.csv --seed 239 --out ../../../results/teste/ --stay
 ```
 
 ## Modificações em relação ao original
@@ -159,7 +176,7 @@ git diff original -- contours/
 | Correções de compatibilidade com Linux | 3 correções para GCC/Qt 6.10, sem mudança de comportamento (detalhes na mensagem do commit) |
 | Caminhos `../images/` → `../Images/` | 26 caminhos em minúsculas que falhavam no Linux (a imagem carregava vazia, sem erro) |
 | Modo em lote `--figure 11 --out <pasta>` | Gera uma única figura do artigo e fecha (`main.cpp`); sem a opção, comportamento original |
-| Rios com elevação explícita (proposta) | Arquivos novos `river-generation.h/.cpp` (subclasse de `IsoVectoGenerationV1`, sem alterar o original) e `river-experiment.cpp`; opções `--experiment` (`baseline`, `control`, `reserve`, `passive`), `--river`, `--seed`, `--stay` |
+| Rios com elevação explícita (proposta) | Arquivos novos `river-generation.h/.cpp` (subclasse de `IsoVectoGenerationV1`, sem alterar o original) e `river-experiment.cpp`; opções `--experiment` (`baseline`, `control`, `reserve`, `passive`, `channel`), `--river`, `--seed`, `--stay` |
 
 ## Problemas conhecidos
 
