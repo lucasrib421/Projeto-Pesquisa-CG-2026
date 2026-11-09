@@ -13,8 +13,8 @@ int main(int argc, char *argv[])
 	QCommandLineParser parser;
 	parser.addHelpOption();
 	QCommandLineOption figureOption("figure", "Generate figure <n> of the paper and quit (supported: 11).", "n");
-	QCommandLineOption experimentOption("experiment", "Run the river experiment and quit: baseline, reserve or passive.", "mode");
-	QCommandLineOption riverOption("river", "River CSV (x,y,elevation in meters, from mouth to source) for --experiment.", "file");
+	QCommandLineOption experimentOption("experiment", "Run the river experiment and quit: baseline, control, reserve or passive.", "mode");
+	QCommandLineOption riverOption("river", "River CSV for --experiment: x,y in meters, elevation normalized to [0,1], from mouth to source.", "file");
 	QCommandLineOption seedOption("seed", "Random seed for --experiment (default: 239, as the original code).", "n", "239");
 	QCommandLineOption outOption("out", "Output folder (default: Figures/).", "folder", "Figures/");
 	QCommandLineOption stayOption("stay", "Keep the window open after --figure or --experiment.");

@@ -127,6 +127,7 @@ namespace
  * River experiment, same setup as GenerateFigure11 (mask, histogram, ~3000 particles).
  *
  * \param mode "baseline": river drawn in the probability map P (Figure 11), no seeds;
+ *             "control": uniform P, no seeds (isolates the effect of the river);
  *             "reserve" / "passive": uniform P and the river of riverFile as seeds (decision D1 A / B)
  * \param riverFile CSV "x,y,elevation" from mouth to source. For the baseline it is only used to measure.
  * \param seed Seed of the random generators (239 = default of the original code)
@@ -135,7 +136,8 @@ namespace
 bool MainWindow::RunRiverExperiment(const QString& mode, const QString& riverFile, int seed, const QString& prefix)
 {
 	IsoVectoGenerationRiver::Mode genMode;
-	if (mode == "baseline")
+	const bool riverInP = (mode == "baseline");
+	if (mode == "baseline" || mode == "control")
 		genMode = IsoVectoGenerationRiver::Mode::None;
 	else if (mode == "reserve")
 		genMode = IsoVectoGenerationRiver::Mode::Reserve;
@@ -143,7 +145,7 @@ bool MainWindow::RunRiverExperiment(const QString& mode, const QString& riverFil
 		genMode = IsoVectoGenerationRiver::Mode::Passive;
 	else
 	{
-		qCritical() << "[River] Unknown mode" << mode << "(baseline, reserve, passive)";
+		qCritical() << "[River] Unknown mode" << mode << "(baseline, control, reserve, passive)";
 		return false;
 	}
 
@@ -172,7 +174,7 @@ bool MainWindow::RunRiverExperiment(const QString& mode, const QString& riverFil
 	ChangeMaskFromFile("../Images/input/mask.png");
 	ChangeHistogramFromFile("../Data/dems/rockies_zoom_breach.png", 12);
 	ChangeEstimatedNbParticles(3000);
-	if (genMode == IsoVectoGenerationRiver::Mode::None)
+	if (riverInP)
 		ChangeNoiseFromFile("../Images/input/proba.png", 4);
 	else
 		ChangeNoise(ScalarField2(Box2(0.5), 256, 256, 1));
