@@ -14,7 +14,16 @@ root = Path(sys.argv[1] if len(sys.argv) > 1 else 'results/experiment-river')
 river_csv = Path(sys.argv[2] if len(sys.argv) > 2 else 'experiments/river-fig11-perfil-alto.csv')
 
 profiles = sorted(p.name for p in root.glob('perfil-*') if (p / 'summary.md').exists())
-modes = [m for m in ['baseline', 'control', 'reserve', 'passive', 'channel'] if any((root / p / m).is_dir() for p in profiles)]
+known = ['baseline', 'control', 'reserve', 'passive', 'channel']
+found = {d.name for p in profiles for d in (root / p).iterdir() if d.is_dir()}
+
+
+def delay_key(m):
+    d = m[len('channel-d'):]
+    return float('inf') if d == 'never' else float(d)
+
+
+modes = [m for m in known if m in found] + sorted((m for m in found - set(known) if m.startswith('channel-d')), key=delay_key)
 seeds = sorted({d.name[len('seed-'):] for p in profiles for m in modes for d in (root / p / m).glob('seed-*') if d.is_dir()},
                key=int)
 
@@ -47,9 +56,18 @@ desc = {
     'passive': 'Proposta, D1-B: nós do rio ativados na senha-alvo ou antes, se o crescimento chegar.',
     'channel': 'Proposta, canal: como reserve, mas o crescimento não se espalha a partir do rio (leito entalhado).',
 }
+
+
+def describe(m):
+    if m in desc:
+        return desc[m]
+    d = m[len('channel-d'):]
+    return 'Canal que nunca espalha o crescimento (= channel).' if d == 'never' else f'Canal que espalha o crescimento após {d} nível(is) de altura.'
+
+
 cols = ''.join(f'''
 <section class="col">
-  <h2>{m}</h2><p class="desc">{desc[m]}</p>
+  <h2>{m}</h2><p class="desc">{describe(m)}</p>
   <h3>Isolinhas</h3><div class="pic"><img class="isos" data-mode="{m}" data-file="isos.svg" alt="Isolinhas, modo {m}">{overlay}</div>
   <h3>Terreno (claro = alto)</h3><div class="pic"><img data-mode="{m}" data-file="terrain.png" alt="Terreno, modo {m}">{overlay}</div>
 </section>''' for m in modes)

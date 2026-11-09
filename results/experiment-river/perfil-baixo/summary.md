@@ -12,13 +12,13 @@ Média ± desvio padrão entre sementes. Alturas normalizadas em [0, 1] (uma cai
 
 ## Forma do vale
 
-| Modo | Execuções | Isolinhas que cruzam o rio | Leito entalhado, 1 nível abaixo das margens a 20-60 m (%) |
-|---|---|---|---|
-| baseline | 5 | 3.4 ± 0.9 | 0.4 ± 1.0 |
-| control | 5 | 11.8 ± 2.9 | 2.5 ± 2.3 |
-| reserve | 5 | 2.0 ± 0.0 | 7.0 ± 5.3 |
-| passive | 5 | 2.4 ± 0.9 | 7.5 ± 6.6 |
-| channel | 5 | 2.0 ± 0.0 | 92.1 ± 5.7 |
+| Modo | Execuções | Isolinhas que cruzam o rio | Leito entalhado nos dois lados (%) | Margem esquerda − leito | Margem direita − leito | Assimetria (esquerda − direita) |
+|---|---|---|---|---|---|---|
+| baseline | 5 | 3.4 ± 0.9 | 0.0 ± 0.0 | 0.016 ± 0.006 | 0.022 ± 0.004 | -0.006 ± 0.005 |
+| control | 5 | 11.8 ± 2.9 | 0.9 ± 1.2 | 0.047 ± 0.010 | -0.032 ± 0.009 | 0.079 ± 0.005 |
+| reserve | 5 | 2.0 ± 0.0 | 0.4 ± 1.0 | 0.061 ± 0.018 | 0.050 ± 0.008 | 0.011 ± 0.027 |
+| passive | 5 | 2.4 ± 0.9 | 3.0 ± 3.3 | 0.053 ± 0.006 | 0.055 ± 0.006 | -0.001 ± 0.010 |
+| channel | 5 | 2.0 ± 0.0 | 85.9 ± 2.9 | 0.342 ± 0.032 | 0.197 ± 0.011 | 0.146 ± 0.025 |
 
 ## Perfil transversal: altura média por distância até o rio
 
@@ -30,11 +30,13 @@ Média ± desvio padrão entre sementes. Alturas normalizadas em [0, 1] (uma cai
 | passive | 5 | 0.085 ± 0.003 | 0.156 ± 0.007 | 0.233 ± 0.004 | 0.282 ± 0.011 | 0.337 ± 0.006 |
 | channel | 5 | 0.275 ± 0.013 | 0.344 ± 0.013 | 0.338 ± 0.011 | 0.333 ± 0.012 | 0.347 ± 0.005 |
 
-## Efeito do rio (positivo = corredor mais baixo que no controle)
+## Efeito do rio em relação ao controle (mesmas sementes)
 
-| Modo | Rebaixamento do corredor 0–60 m em relação ao controle |
-|---|---|
-| baseline | +0.161 ± 0.009 |
-| reserve | +0.160 ± 0.005 |
-| passive | +0.165 ± 0.009 |
-| channel | -0.024 ± 0.009 |
+Rebaixamento: positivo = corredor mais baixo que no controle. Assimetria extra: assimetria do modo menos a do controle; perto de 0 = sem degrau criado pelo rio.
+
+| Modo | Rebaixamento do corredor 0–60 m | Assimetria extra (degrau) |
+|---|---|---|
+| baseline | +0.161 ± 0.009 | -0.085 ± 0.008 |
+| reserve | +0.160 ± 0.005 | -0.068 ± 0.025 |
+| passive | +0.165 ± 0.009 | -0.080 ± 0.012 |
+| channel | -0.024 ± 0.009 | +0.067 ± 0.022 |
