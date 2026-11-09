@@ -128,7 +128,7 @@ def main():
         w.writeheader()
         w.writerows(rows)
 
-    modes = [m for m in ['baseline', 'control', 'reserve', 'passive'] if any(r['mode'] == m for r in rows)]
+    modes = [m for m in ['baseline', 'control', 'reserve', 'passive', 'channel'] if any(r['mode'] == m for r in rows)]
 
     def table(cols):
         lines = ['| Modo | Execuções | ' + ' | '.join(c[1] for c in cols) + ' |',

@@ -4,18 +4,19 @@
 # Saída em results/experiment-river/perfil-<perfil>/<modo>/seed-<n>/, métricas por perfil e
 # a página results/experiment-river/index.html.
 # Uso: bash scripts/experiment-river.sh [sementes...]   (padrão: 239 240 241 242 243)
-# Só alguns perfis: PROFILES="terreno" bash scripts/experiment-river.sh
+# Só alguns perfis ou modos: PROFILES="terreno" MODES="channel" bash scripts/experiment-river.sh
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 if [ $# -gt 0 ]; then SEEDS=("$@"); else SEEDS=(239 240 241 242 243); fi
 PROFILES=(${PROFILES:-alto baixo terreno})
+MODES=(${MODES:-baseline control reserve passive channel})
 
 for profile in "${PROFILES[@]}"; do
     # Caminhos relativos à pasta de trabalho do run.sh (contours/AppIso/AppIso)
     river=../../../experiments/river-fig11-perfil-$profile.csv
     out=../../../results/experiment-river/perfil-$profile
-    for mode in baseline control reserve passive; do
+    for mode in "${MODES[@]}"; do
         for seed in "${SEEDS[@]}"; do
             dir="$REPO_DIR/results/experiment-river/perfil-$profile/$mode/seed-$seed"
             mkdir -p "$dir"

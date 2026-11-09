@@ -14,7 +14,7 @@ root = Path(sys.argv[1] if len(sys.argv) > 1 else 'results/experiment-river')
 river_csv = Path(sys.argv[2] if len(sys.argv) > 2 else 'experiments/river-fig11-perfil-alto.csv')
 
 profiles = sorted(p.name for p in root.glob('perfil-*') if (p / 'summary.md').exists())
-modes = [m for m in ['baseline', 'control', 'reserve', 'passive'] if any((root / p / m).is_dir() for p in profiles)]
+modes = [m for m in ['baseline', 'control', 'reserve', 'passive', 'channel'] if any((root / p / m).is_dir() for p in profiles)]
 seeds = sorted({d.name[len('seed-'):] for p in profiles for m in modes for d in (root / p / m).glob('seed-*') if d.is_dir()},
                key=int)
 
@@ -45,6 +45,7 @@ desc = {
     'control': 'Controle: mapa P uniforme e nenhum rio (isola o efeito do rio).',
     'reserve': 'Proposta, D1-A: nós do rio reservados até a senha-alvo.',
     'passive': 'Proposta, D1-B: nós do rio ativados na senha-alvo ou antes, se o crescimento chegar.',
+    'channel': 'Proposta, canal: como reserve, mas o crescimento não se espalha a partir do rio (leito entalhado).',
 }
 cols = ''.join(f'''
 <section class="col">

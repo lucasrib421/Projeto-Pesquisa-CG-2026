@@ -128,7 +128,8 @@ namespace
  *
  * \param mode "baseline": river drawn in the probability map P (Figure 11), no seeds;
  *             "control": uniform P, no seeds (isolates the effect of the river);
- *             "reserve" / "passive": uniform P and the river of riverFile as seeds (decision D1 A / B)
+ *             "reserve" / "passive": uniform P and the river of riverFile as seeds (decision D1 A / B);
+ *             "channel": as "reserve", but the growth does not spread from the river (incised riverbed)
  * \param riverFile CSV "x,y,elevation" from mouth to source. For the baseline it is only used to measure.
  * \param seed Seed of the random generators (239 = default of the original code)
  * \param prefix Output folder
@@ -143,9 +144,11 @@ bool MainWindow::RunRiverExperiment(const QString& mode, const QString& riverFil
 		genMode = IsoVectoGenerationRiver::Mode::Reserve;
 	else if (mode == "passive")
 		genMode = IsoVectoGenerationRiver::Mode::Passive;
+	else if (mode == "channel")
+		genMode = IsoVectoGenerationRiver::Mode::Channel;
 	else
 	{
-		qCritical() << "[River] Unknown mode" << mode << "(baseline, control, reserve, passive)";
+		qCritical() << "[River] Unknown mode" << mode << "(baseline, control, reserve, passive, channel)";
 		return false;
 	}
 

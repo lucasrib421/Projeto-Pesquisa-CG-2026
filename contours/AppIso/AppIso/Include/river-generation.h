@@ -13,6 +13,9 @@
  *     their target, so they get exactly the requested rank;
  *   - Mode::Passive: river nodes are not blocked; they get the rank of
  *     whichever comes first, the natural growth or their target;
+ *   - Mode::Channel: as Reserve, but an activated river node does not join
+ *     the growth front: the growth does not spread from the river, so the
+ *     banks keep their natural rank and the riverbed is incised below them;
  *   - Mode::None: no seeds; same algorithm as IsoVectoGenerationV1.
  *
  * The original IsoVectoGenerationV1 is left untouched: the growth loop is
@@ -21,7 +24,7 @@
 class IsoVectoGenerationRiver : public IsoVectoGenerationV1
 {
 public:
-	enum class Mode { None, Reserve, Passive };
+	enum class Mode { None, Reserve, Passive, Channel };
 
 	struct Seed
 	{

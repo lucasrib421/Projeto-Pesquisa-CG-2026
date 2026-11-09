@@ -52,7 +52,7 @@ void IsoVectoGenerationRiver::PreProcessRiver()
 	nextSeed = 0;
 	stats = Stats();
 
-	if (mode == Mode::Reserve)
+	if (mode == Mode::Reserve || mode == Mode::Channel)
 	{
 		for (const Seed& s : seeds)
 			R[s.node] = RESERVED_VALUE;
@@ -77,7 +77,10 @@ void IsoVectoGenerationRiver::ActivateSeed(int node, bool forced)
 	if (R[node] == INITIAL_VALUE || R[node] == RESERVED_VALUE)
 	{
 		R[node] = GetNextHeight();
-		borders.insert(node);
+		// In channel mode the river does not seed the growth of its banks,
+		// unless it is forced to unblock an empty front
+		if (mode != Mode::Channel || forced)
+			borders.insert(node);
 		if (forced)
 			stats.forcedEarly++;
 		else
