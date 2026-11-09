@@ -122,6 +122,9 @@ class MainWindow : public QMainWindow {
 	void GenerateFigurePresentation5(const QString&);
 	void GenerateFigurePresentation6(const QString&);
 
+	// River experiment (river-experiment.cpp)
+	bool RunRiverExperiment(const QString& mode, const QString& riverFile, int seed, const QString& prefix);
+
 	// Parameters
 	void ResetHistogramView();
 	void ChangeHistogram(const HistogramD&);

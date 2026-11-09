@@ -9,24 +9,41 @@ int main(int argc, char *argv[])
 	QApplication app(argc, argv);
 	//srand(time(NULL));
 
-	// Batch mode: generate one figure of the paper, then quit.
+	// Batch mode: generate one figure of the paper, or run the river experiment, then quit.
 	QCommandLineParser parser;
 	parser.addHelpOption();
 	QCommandLineOption figureOption("figure", "Generate figure <n> of the paper and quit (supported: 11).", "n");
-	QCommandLineOption outOption("out", "Output folder for --figure (default: Figures/).", "folder", "Figures/");
-	parser.addOption(figureOption);
-	parser.addOption(outOption);
+	QCommandLineOption experimentOption("experiment", "Run the river experiment and quit: baseline, reserve or passive.", "mode");
+	QCommandLineOption riverOption("river", "River CSV (x,y,elevation in meters, from mouth to source) for --experiment.", "file");
+	QCommandLineOption seedOption("seed", "Random seed for --experiment (default: 239, as the original code).", "n", "239");
+	QCommandLineOption outOption("out", "Output folder (default: Figures/).", "folder", "Figures/");
+	QCommandLineOption stayOption("stay", "Keep the window open after --figure or --experiment.");
+	parser.addOptions({ figureOption, experimentOption, riverOption, seedOption, outOption, stayOption });
 	parser.process(app);
 
-	const bool batch = parser.isSet(figureOption);
+	const bool figure = parser.isSet(figureOption);
+	const bool experiment = parser.isSet(experimentOption);
 	QString outFolder = parser.value(outOption);
 	if (!outFolder.endsWith('/'))
 		outFolder += '/';
-	if (batch && parser.value(figureOption) != "11")
+	if (figure && experiment)
+	{
+		qCritical() << "Use either --figure or --experiment, not both";
+		return 2;
+	}
+	if (figure && parser.value(figureOption) != "11")
 	{
 		qCritical() << "Unsupported figure:" << parser.value(figureOption) << "(supported: 11)";
 		return 2;
 	}
+	bool seedOk;
+	const int seed = parser.value(seedOption).toInt(&seedOk);
+	if (!seedOk)
+	{
+		qCritical() << "Invalid seed:" << parser.value(seedOption);
+		return 2;
+	}
+	const bool stay = parser.isSet(stayOption);
 
 	MainWindow mainWin;
 
@@ -37,14 +54,25 @@ int main(int argc, char *argv[])
     mainWin.move(targetScreen->availableGeometry().topLeft());
     mainWin.showMaximized();
 
-	if (batch)
+	int exitCode = 0;
+	if (figure || experiment)
 	{
 		// Runs once the event loop has started, so the OpenGL widget is initialized.
 		QTimer::singleShot(0, &mainWin, [&]() {
-			mainWin.GenerateFigure11(outFolder);
-			qInfo() << "Figure 11 written to" << outFolder;
-			app.quit();
+			if (figure)
+			{
+				mainWin.GenerateFigure11(outFolder);
+				qInfo() << "Figure 11 written to" << outFolder;
+			}
+			else if (mainWin.RunRiverExperiment(parser.value(experimentOption), parser.value(riverOption), seed, outFolder))
+				qInfo() << "Experiment written to" << outFolder;
+			else
+				exitCode = 1;
+
+			if (!stay || exitCode != 0)
+				app.exit(exitCode);
 		});
 	}
-	return app.exec();
+	const int loopCode = app.exec();
+	return exitCode != 0 ? exitCode : loopCode;
 }

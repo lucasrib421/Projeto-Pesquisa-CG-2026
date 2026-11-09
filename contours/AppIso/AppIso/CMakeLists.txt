@@ -70,6 +70,8 @@ add_executable(AppIso
   Source/main-window.cpp
   Source/main-window-app.cpp
   Source/misc.cpp
+  Source/river-experiment.cpp
+  Source/river-generation.cpp
   Source/tin.cpp
 
   LibCore/Source/analyticpalette.cpp
