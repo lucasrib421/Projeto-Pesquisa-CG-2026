@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 # Experimento do rio: baseline (rio no mapa P) × proposta (rio explícito, modos reserve e passive),
-# para dois perfis de altura do leito e várias sementes.
+# para três perfis de altura do leito (alto, baixo, terreno) e várias sementes.
 # Saída em results/experiment-river/perfil-<perfil>/<modo>/seed-<n>/, métricas por perfil e
 # a página results/experiment-river/index.html.
 # Uso: bash scripts/experiment-river.sh [sementes...]   (padrão: 239 240 241 242 243)
+# Só alguns perfis: PROFILES="terreno" bash scripts/experiment-river.sh
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 if [ $# -gt 0 ]; then SEEDS=("$@"); else SEEDS=(239 240 241 242 243); fi
-PROFILES=(alto baixo)
+PROFILES=(${PROFILES:-alto baixo terreno})
 
 for profile in "${PROFILES[@]}"; do
     # Caminhos relativos à pasta de trabalho do run.sh (contours/AppIso/AppIso)

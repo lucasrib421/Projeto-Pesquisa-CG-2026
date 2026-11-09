@@ -78,17 +78,33 @@ def run_metrics(run_dir):
         # Perfil transversal: altura média dos nós (fora da costa) por faixa de distância até o rio.
         # O rio funciona como semente e rebaixa um corredor em volta dele, não só os próprios nós.
         pos = {i: (float(r['x']), float(r['y'])) for i, r in nodes.items()}
+        dist_river = {i: min(math.dist(pos[i], pos[j]) for j in river) for i in nodes}
         bands = {b: [] for b in BANDS}
         for i, r in nodes.items():
             if r['coast'] == '1':
                 continue
-            dist = min(math.dist(pos[i], pos[j]) for j in river)
             for b in BANDS:
-                if b[0] <= dist < b[1]:
+                if b[0] <= dist_river[i] < b[1]:
                     bands[b].append(height[i])
         for b, vals in bands.items():
             if vals:
                 m[band_key(b)] = statistics.mean(vals)
+
+        # Forma do vale.
+        # Cruzamentos: quantas vezes a altura muda entre nós consecutivos do rio (cada mudança é uma
+        # isolinha cruzando o rio; sem cruzamento não há o "V" das curvas de nível).
+        # Leito entalhado: nó do rio pelo menos um nível abaixo da média das margens laterais
+        # (nós a 20-60 m dele e a pelo menos 20 m do traçado).
+        along = [height[i] for i in sorted(river, key=lambda i: int(nodes[i]['river_index']))]
+        level = statistics.median(b - a for a, b in zip(keys, keys[1:]))
+        incised = 0
+        for i in river:
+            side = [height[j] for j in nodes if nodes[j]['coast'] == '0' and dist_river[j] >= 20
+                    and 20 <= math.dist(pos[i], pos[j]) <= 60]
+            if side and statistics.mean(side) - height[i] >= level - 1e-9:
+                incised += 1
+        m['river_contour_crossings'] = sum(1 for a, b in zip(along, along[1:]) if a != b)
+        m['riverbed_incised_pct'] = 100.0 * incised / len(river)
     return m
 
 
@@ -135,6 +151,8 @@ def main():
                         ('valley_by_rank_pct', 'Abaixo das margens imediatas, por senha (%)', 1),
                         ('valley_by_height_pct', 'Abaixo das margens imediatas, por altura (%)', 1),
                         ('ms_growth', 'Crescimento (ms)', 0)])
+    shape_table = table([('river_contour_crossings', 'Isolinhas que cruzam o rio', 1),
+                         ('riverbed_incised_pct', 'Leito entalhado, 1 nível abaixo das margens a 20-60 m (%)', 1)])
     profile_table = table([(band_key(b), f'{b[0]}–{b[1]} m', 3) for b in BANDS])
 
     # Efeito do rio: quanto o corredor de 0–60 m fica mais baixo que no controle (mesmas sementes)
@@ -157,6 +175,7 @@ def main():
 
     text = ('# Resumo do experimento do rio\n\nMédia ± desvio padrão entre sementes. Alturas normalizadas em [0, 1] '
             '(uma caixa do histograma ≈ 0,09).\n\n' + main_table +
+            '\n## Forma do vale\n\n' + shape_table +
             '\n## Perfil transversal: altura média por distância até o rio\n\n' + profile_table +
             ('\n## Efeito do rio (positivo = corredor mais baixo que no controle)\n\n' + effect_table if effect_table else ''))
     (root / 'summary.md').write_text(text)

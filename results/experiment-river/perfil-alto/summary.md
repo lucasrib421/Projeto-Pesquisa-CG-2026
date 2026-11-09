@@ -9,6 +9,15 @@ Média ± desvio padrão entre sementes. Alturas normalizadas em [0, 1] (uma cai
 | reserve | 5 | 0 ± 0 | 0.021 ± 0.001 | 0.044 ± 0.001 | 0.021 ± 0.001 | 75.2 ± 6.5 | 0.0 ± 0.0 | 12 ± 1 |
 | passive | 5 | 0 ± 0 | 0.024 ± 0.002 | 0.065 ± 0.006 | 0.021 ± 0.001 | 83.5 ± 6.3 | 0.4 ± 0.9 | 14 ± 6 |
 
+## Forma do vale
+
+| Modo | Execuções | Isolinhas que cruzam o rio | Leito entalhado, 1 nível abaixo das margens a 20-60 m (%) |
+|---|---|---|---|
+| baseline | 5 | 3.4 ± 0.9 | 0.4 ± 1.0 |
+| control | 5 | 11.8 ± 2.9 | 2.5 ± 2.3 |
+| reserve | 5 | 4.0 ± 0.0 | 0.0 ± 0.0 |
+| passive | 5 | 4.8 ± 1.1 | 0.4 ± 0.9 |
+
 ## Perfil transversal: altura média por distância até o rio
 
 | Modo | Execuções | 0–30 m | 30–60 m | 60–100 m | 100–150 m | 150–250 m |

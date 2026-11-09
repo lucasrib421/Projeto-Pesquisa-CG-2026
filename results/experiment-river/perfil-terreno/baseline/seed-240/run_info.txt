@@ -1,0 +1,17 @@
+mode=baseline
+seed=240
+river_file=../../../experiments/river-fig11-perfil-terreno.csv
+nodes=3027
+poisson_radius=5.94401
+river_points=26
+river_points_raised_D2=0
+river_nodes=50
+river_gaps_D4=0
+seeds_activated_on_target=0
+seeds_already_assigned=0
+seeds_forced_early=0
+ms_graph=39
+ms_growth=12
+ms_isolines=197
+histogram_keys=0.001;0.0911052;0.18121;0.271316;0.361421;0.451526;0.541631;0.631736;0.721841;0.811947;0.902052;0.992157
+histogram_counts=303;282;358;336;359;375;334;286;209;122;45;18
