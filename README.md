@@ -29,6 +29,7 @@ scripts/
   metrics.py     métricas do experimento (summary.csv, summary.md)
   compare_page.py  página HTML de comparação lado a lado
   make_profile.py  gera o perfil de leito que acompanha o terreno
+  experiment-delay.sh  varredura do atraso de espalhamento do modo channel
 experiments/     entradas dos experimentos (traçado do rio em CSV, três perfis)
 results/         resultados dos experimentos
 build/           saída da compilação (não versionada)
@@ -110,33 +111,34 @@ explorer.exe "$(wslpath -w results/experiment-river/index.html)"
 
 Resultados completos em `results/experiment-river/perfil-<alto|baixo|terreno>/summary.md`. Resumo (média entre as 5 sementes; alturas normalizadas em [0, 1], uma caixa do histograma ≈ 0,09; baseline e controle não dependem do perfil):
 
-| Perfil | Modo | Nós sem vizinho mais baixo | Erro médio no leito | Leito entalhado (%) | Rebaixamento do corredor 0–60 m |
-|---|---|---|---|---|---|
-| — | baseline | 0 | — | 0,4 | +0,161 |
-| — | control | 0 | — | 2,5 | — |
-| alto | reserve | 0 | 0,021 | 0,0 | +0,068 |
-| alto | passive | 0 | 0,024 | 0,4 | +0,069 |
-| alto | channel | 0 | 0,021 | 68,3 | −0,039 |
-| baixo | reserve | 0 | 0,023 | 7,0 | +0,160 |
-| baixo | passive | 0 | 0,023 | 7,5 | +0,165 |
-| baixo | channel | 0 | 0,023 | 92,1 | −0,024 |
-| terreno | reserve | 0 | 0,024 | 0,0 | +0,064 |
-| terreno | passive | 0 | 0,029 | 0,4 | +0,067 |
-| terreno | channel | 0 | 0,024 | 74,5 | −0,040 |
+| Perfil | Modo | Nós sem vizinho mais baixo | Erro médio no leito | Leito entalhado nos dois lados (%) | Rebaixamento do corredor 0–60 m | Degrau (assimetria extra) |
+|---|---|---|---|---|---|---|
+| — | baseline | 0 | — | 0,0 | +0,161 | −0,085 |
+| — | control | 0 | — | 0,9 | — | — |
+| alto | reserve | 0 | 0,021 | 0,0 | +0,068 | −0,062 |
+| alto | passive | 0 | 0,024 | 0,0 | +0,069 | −0,069 |
+| alto | channel | 0 | 0,021 | 43,1 | −0,039 | +0,068 |
+| baixo | reserve | 0 | 0,023 | 0,4 | +0,160 | −0,068 |
+| baixo | passive | 0 | 0,023 | 3,0 | +0,165 | −0,080 |
+| baixo | channel | 0 | 0,023 | 85,9 | −0,024 | +0,067 |
+| terreno | reserve | 0 | 0,024 | 0,0 | +0,064 | −0,067 |
+| terreno | passive | 0 | 0,029 | 0,0 | +0,067 | −0,056 |
+| terreno | channel | 0 | 0,024 | 37,7 | −0,040 | +0,068 |
 
 O que os resultados mostram até aqui:
 - Nenhum modo cria nós sem vizinho mais baixo: a garantia do artigo (sem bacias endorreicas) se mantém com o rio explícito.
 - A proposta controla a altura do leito: o erro fica no piso de quantização (o menor possível com 12 alturas). O erro da baseline em relação aos perfis é de 0,04 a 0,10.
 - Há dois efeitos distintos, e cada variante produz um:
   - **Corredor rebaixado** (`reserve`, `passive`, e também a `baseline`): o rio vira semente, o crescimento se espalha a partir dele e as margens recebem as senhas seguintes. O terreno desce numa faixa de ~60 a 100 m (até +0,16 com o perfil baixo, igual à baseline), mas o leito fica na mesma altura das margens: um lóbulo largo, sem a forma de vale (leito entalhado ~0%, inclusive na baseline).
-  - **Leito entalhado** (`channel`): o rio recebe a altura pedida, mas não semeia as margens, que ficam com a altura natural. O leito fica pelo menos um nível abaixo das margens em 68 a 92% dos nós, e o canal aparece no terreno. O corredor em volta não desce (fica levemente mais alto que no controle; hipótese: os nós reservados funcionam como parede e atrasam o crescimento ao redor).
-- Um vale de rio real combina os dois efeitos (canal entalhado dentro de um vale mais largo); nenhuma variante atual faz as duas coisas.
+  - **Leito entalhado** (`channel`): o rio recebe a altura pedida, mas não semeia as margens, que ficam com a altura natural. O leito fica abaixo das duas margens em 38 a 86% dos nós, conforme o perfil, e o canal aparece no terreno. O corredor em volta não desce, e surge um **degrau**: a margem leste fica ~0,07 mais alta do que no controle, porque os nós do rio, que nunca entram na frente, funcionam como parede permanente e o lado leste só é alcançado contornando o rio (confirmado pela varredura do atraso, abaixo).
+- Um vale de rio real combina os dois efeitos (canal entalhado dentro de um vale mais largo). Nenhuma das variantes acima faz as duas coisas; o canal com espalhamento atrasado (seção seguinte) faz.
 
 Definições (em `scripts/metrics.py`):
 - **Nós sem vizinho mais baixo:** nós fora da costa sem vizinho de senha menor. É a garantia do artigo; deve ser 0.
 - **Erro no leito:** \|altura gerada − altura pedida\| nos nós do rio.
 - **Piso de quantização:** menor erro possível, porque o terreno só tem 12 alturas (uma por caixa do histograma).
-- **Leito entalhado:** nó do rio pelo menos um nível abaixo da média das margens laterais (nós a 20–60 m dele e a pelo menos 20 m do traçado). Mede a forma de vale: nos cruzamentos, a isolinha é empurrada rio acima.
+- **Leito entalhado nos dois lados:** nó do rio pelo menos um nível abaixo da média da margem esquerda **e** da direita (nós a 20–60 m dele e a pelo menos 20 m do traçado, separados pela direção local do rio). Mede a forma de vale. Uma versão anterior usava a média das duas margens juntas e superestimava o entalhe quando um lado era muito mais alto (ex.: 74,5% contra 37,7% no perfil terreno).
+- **Degrau (assimetria extra):** (margem esquerda − margem direita) no modo menos a mesma diferença no controle, por semente. Perto de 0: o rio não criou degrau; negativo: o vale ficou mais simétrico que o terreno natural.
 - **Isolinhas que cruzam o rio** (no `summary.md`): mudanças de altura entre nós consecutivos do rio.
 - **Perfil transversal** (no `summary.md`): altura média por faixa de distância até o rio. **Rebaixamento do corredor:** média das faixas 0–30 m e 30–60 m no controle menos a mesma média no modo, por semente.
 - **Abaixo das margens imediatas** (no `summary.md`, por senha e por altura): a versão por senha pode ser alta enquanto a por altura é ~0%, porque senhas próximas caem na mesma caixa de altura.
@@ -147,11 +149,36 @@ Limitações conhecidas destes resultados preliminares:
 - O traçado segue só o braço esquerdo do rio da Figura 11.
 - Métricas medidas nas alturas do grafo (12 níveis), não no terreno interpolado.
 
-### Decisões de implementação (provisórias)
+## Canal com espalhamento atrasado (varredura)
+
+```bash
+bash scripts/experiment-delay.sh
+```
+
+O modo `channel` aceita `--spread-delay D` (em níveis de altura; 1 nível = nós / caixas do histograma senhas): o nó do rio recebe a altura pedida e só passa a espalhar o crescimento D níveis depois. Durante o atraso as margens ficam mais altas que o leito (entalhe); depois o rio espalha e o entorno desce (corredor). `D = 0` é idêntico à `reserve` e D ausente (nunca espalha) é idêntico ao `channel`, byte a byte. A varredura roda D = 0; 0,5; 1; 2; nunca, mais o controle, nos perfis baixo e terreno (5 sementes; ~8 minutos). Resultados em `results/experiment-delay/` (página em `results/experiment-delay/index.html`).
+
+Perfil baixo (média de 5 sementes; em todas as linhas: 0 nós sem vizinho mais baixo e erro no leito 0,023, o piso):
+
+| D (níveis) | Leito entalhado nos dois lados (%) | Rebaixamento do corredor 0–60 m | Degrau (assimetria extra) |
+|---|---|---|---|
+| 0 (= reserve) | 0,4 | +0,160 | −0,068 |
+| 0,5 | 18,8 | +0,136 | −0,050 |
+| 1 | 64,6 | +0,113 | −0,067 |
+| **2** | **85,9** | **+0,071** | **−0,056** |
+| nunca (= channel) | 85,9 | −0,024 | +0,067 |
+
+No perfil terreno, a tendência é a mesma, mas mais fraca (D = 2: 36,7% de entalhe, corredor +0,003), porque o leito pedido fica só 0,1 abaixo do terreno natural.
+
+O que a varredura mostra:
+- O entalhe cresce com o atraso e satura em D = 2; o corredor diminui com o atraso.
+- O degrau só aparece quando o rio **nunca** espalha: com qualquer atraso finito, depois de liberado o rio deixa o crescimento atravessar, e o outro lado não fica atrasado. Isso confirma a hipótese da parede (permanente) para o degrau do `channel`.
+- Com D = 2 e o perfil baixo, o rio fica entalhado nos dois lados **e** dentro de um corredor rebaixado, sem degrau: a primeira variante com a forma de um vale de rio. No terreno, aparece como um canal dentro de uma faixa mais escura dos dois lados.
+
+## Decisões de implementação (provisórias)
 
 | Decisão | Escolha atual |
 |---|---|
-| D1. Crescimento chega ao rio antes da hora | Três variantes implementadas para comparação: `reserve`, `passive` e `channel` |
+| D1. Crescimento chega ao rio antes da hora | Variantes implementadas para comparação: `reserve`, `passive` e `channel` (com atraso de espalhamento `--spread-delay`) |
 | D2. Rio que "sobe" | Máximo acumulado da foz para a nascente (contado em `run_info.txt`) |
 | D3. Entrada | CSV `x,y,elevation`: metros no domínio `Box2(500)` e altura **normalizada [0, 1]**, da foz para a nascente |
 | D4. Linha → nós do grafo | Nó mais próximo a cada passo de r/4 ao longo da linha; buracos contados em `run_info.txt` |
@@ -160,7 +187,7 @@ Limitações conhecidas destes resultados preliminares:
 Para rodar um modo isolado (os caminhos são relativos a `contours/AppIso/AppIso`, a pasta de trabalho do `run.sh`; `--stay` mantém a janela aberta para ver o terreno em 3D):
 
 ```bash
-bash scripts/run.sh --experiment channel --river ../../../experiments/river-fig11-perfil-baixo.csv --seed 239 --out ../../../results/teste/ --stay
+bash scripts/run.sh --experiment channel --spread-delay 2 --river ../../../experiments/river-fig11-perfil-baixo.csv --seed 239 --out ../../../results/teste/ --stay
 ```
 
 ## Modificações em relação ao original
@@ -176,7 +203,7 @@ git diff original -- contours/
 | Correções de compatibilidade com Linux | 3 correções para GCC/Qt 6.10, sem mudança de comportamento (detalhes na mensagem do commit) |
 | Caminhos `../images/` → `../Images/` | 26 caminhos em minúsculas que falhavam no Linux (a imagem carregava vazia, sem erro) |
 | Modo em lote `--figure 11 --out <pasta>` | Gera uma única figura do artigo e fecha (`main.cpp`); sem a opção, comportamento original |
-| Rios com elevação explícita (proposta) | Arquivos novos `river-generation.h/.cpp` (subclasse de `IsoVectoGenerationV1`, sem alterar o original) e `river-experiment.cpp`; opções `--experiment` (`baseline`, `control`, `reserve`, `passive`, `channel`), `--river`, `--seed`, `--stay` |
+| Rios com elevação explícita (proposta) | Arquivos novos `river-generation.h/.cpp` (subclasse de `IsoVectoGenerationV1`, sem alterar o original) e `river-experiment.cpp`; opções `--experiment` (`baseline`, `control`, `reserve`, `passive`, `channel`), `--river`, `--seed`, `--spread-delay`, `--stay` |
 
 ## Problemas conhecidos
 

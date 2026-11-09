@@ -1,0 +1,4 @@
+Dropped Escape call with ulEscapeCode : 0x03007703
+[Zones graph] nb particles: 2955
+[River] "channel" seed 242 : 47 river nodes, 0 gaps, 47 on target, 0 already assigned, 0 forced
+Experiment written to "../../../results/experiment-delay/perfil-terreno/channel-d0/seed-242/"
