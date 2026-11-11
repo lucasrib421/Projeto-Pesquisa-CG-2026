@@ -2,115 +2,260 @@
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Rios com elevação explícita</title>
 <meta name="description" content="Projeto de pesquisa em Computação Gráfica: rios com elevação explícita na síntese de terrenos por iso-contornos.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet">
 <style>
-:root { --bg:#f6f3ec; --fg:#1f2a2e; --muted:#5f6b66; --line:#ddd6c8; --card:#fdfbf6; --accent:#a84e2a; --river:#00a37a; --best:#e9f3ee; }
-@media (prefers-color-scheme: dark) { :root { --bg:#1f2a2e; --fg:#f6f3ec; --muted:#bfcbc6; --line:#3a474c; --card:#26343a; --accent:#e08a5f; --river:#3fd6a8; --best:#22413a; } }
+:root { --bg:#f6f3ec; --fg:#1f2a2e; --muted:#5b6662; --line:#ddd6c8; --card:#fdfbf6; --accent:#a84e2a;
+        --river:#0b8f6c; --best:#e6f2ec; --chip:#efe9dd; }
+@media (prefers-color-scheme: dark) { :root { --bg:#1b2427; --fg:#f2efe8; --muted:#b8c4bf; --line:#34434a; --card:#233036;
+        --accent:#e59a72; --river:#3fd6a8; --best:#1f3d36; --chip:#2c3b42; } }
 * { box-sizing:border-box; }
-body { background:var(--bg); color:var(--fg); font:16px/1.6 system-ui, sans-serif; margin:0; }
-main { max-width:1200px; margin:0 auto; padding:24px 16px 48px; }
-h1 { font-size:30px; line-height:1.2; margin:0 0 8px; } h2 { font-size:22px; margin:40px 0 12px; }
-.eyebrow { color:var(--accent); font-weight:700; letter-spacing:2px; text-transform:uppercase; font-size:13px; margin:0 0 8px; }
-.muted { color:var(--muted); } a { color:var(--accent); }
-.lead { font-size:18px; max-width:820px; }
-.grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:16px; }
-.card { margin:0; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; }
-.card.best { border:2px solid var(--river); }
-.card figcaption { display:flex; flex-direction:column; gap:2px; margin-bottom:8px; font-size:14px; }
-.card figcaption span { color:var(--muted); }
-.pic { position:relative; margin-top:8px; } .pic img { width:100%; display:block; border-radius:6px; } .isos { background:#fff; }
+body { background:var(--bg); color:var(--fg); font:16px/1.65 Inter, system-ui, sans-serif; margin:0; }
+main { max-width:1180px; margin:0 auto; padding:0 16px 64px; }
+h1, h2, h3 { font-family:'Source Serif 4', Georgia, serif; font-weight:600; line-height:1.2; }
+h2 { font-size:26px; margin:56px 0 8px; }
+h2 + .intro { margin-top:0; color:var(--muted); max-width:760px; }
+a { color:var(--accent); text-decoration:none; } a:hover { text-decoration:underline; }
+
+.hero { padding:56px 0 32px; border-bottom:1px solid var(--line); }
+.kicker { font-size:13px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin:0 0 12px; }
+.hero h1 { font-size:clamp(32px, 5vw, 48px); margin:0; }
+.hero .subtitle { font-family:'Source Serif 4', Georgia, serif; font-size:clamp(20px, 3vw, 26px); color:var(--muted); margin:4px 0 20px; }
+.hero .team { margin:0 0 16px; font-size:15px; color:var(--muted); }
+.pills { display:flex; gap:8px; flex-wrap:wrap; }
+.pill { font-size:14px; font-weight:500; padding:6px 14px; border:1px solid var(--line); border-radius:999px; background:var(--card); color:var(--fg); }
+.pill:hover { border-color:var(--accent); text-decoration:none; }
+
+.summary { display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:16px; margin-top:32px; }
+.summary div { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:18px; }
+.summary h3 { font-size:18px; margin:0 0 6px; color:var(--accent); }
+.summary p { margin:0; }
+
+.steps { display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:16px; counter-reset:step; margin-top:16px; }
+.steps div { border-left:3px solid var(--accent); padding:4px 0 4px 16px; }
+.steps h3 { font-size:17px; margin:0 0 4px; }
+.steps h3::before { counter-increment:step; content:counter(step) ". "; color:var(--accent); }
+.steps p { margin:0; }
+
+.legend { display:flex; gap:20px; flex-wrap:wrap; font-size:14px; color:var(--muted); margin:16px 0; align-items:center; }
+.legend span { display:inline-flex; gap:8px; align-items:center; }
+.ramp { width:72px; height:10px; border-radius:5px; background:linear-gradient(90deg, #5470e8, #d9dbe6, #e05a45); }
+.gray { width:72px; height:10px; border-radius:5px; background:linear-gradient(90deg, #000, #fff); border:1px solid var(--line); }
+.dash { width:32px; border-top:3px dashed var(--river); }
+label { display:inline-flex; gap:8px; align-items:center; cursor:pointer; }
+
+.methods { display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 460px), 1fr)); gap:20px; }
+.method { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; display:flex; flex-direction:column; }
+.method.best { border:2px solid var(--river); }
+.method .tag { font-size:12px; letter-spacing:1px; text-transform:uppercase; color:var(--muted); margin:0; }
+.method.best .tag { color:var(--river); font-weight:600; }
+.method h3 { font-size:20px; margin:2px 0 10px; }
+.method h4 { font-size:13px; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin:14px 0 2px; }
+.method p { margin:0; font-size:15px; }
+.badges { list-style:none; padding:0; margin:0 0 10px; display:flex; gap:6px; flex-wrap:wrap; }
+.badges li { background:var(--chip); border-radius:8px; padding:4px 8px; font-size:12px; display:flex; flex-direction:column; line-height:1.3; }
+.badges b { font-size:15px; } .badges span { color:var(--muted); }
+.viewer { position:relative; }
+.viewer .pic { display:none; }
+.viewer[data-view="0"] .pic:nth-of-type(1), .viewer[data-view="1"] .pic:nth-of-type(2) { display:block; }
+.pic { position:relative; } .pic img { width:100%; aspect-ratio:1; display:block; border-radius:8px; } .isos { background:#fff; }
+.nav { display:flex; align-items:center; justify-content:center; gap:12px; margin-top:8px; }
+.nav button { width:36px; height:36px; border-radius:50%; border:1px solid var(--line); background:var(--bg); color:var(--fg);
+               font-size:22px; line-height:1; cursor:pointer; }
+.nav button:hover { border-color:var(--accent); }
+.nav .label { min-width:96px; text-align:center; font-weight:600; font-size:14px; }
+.switch { display:inline-flex; border:1px solid var(--line); border-radius:999px; overflow:hidden; }
+.switch button { border:0; background:var(--card); color:var(--fg); padding:6px 14px; font:inherit; font-size:14px; cursor:pointer; }
+.switch button[aria-pressed="true"] { background:var(--accent); color:#fff; }
 .river { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
-.river polyline { fill:none; stroke:var(--river); stroke-width:5; stroke-dasharray:14 8; }
+.river polyline { fill:none; stroke:var(--river); stroke-width:6; stroke-dasharray:16 10; }
 body.hide-river .river { display:none; }
-.tablewrap { overflow-x:auto; }
+
+.tablewrap { overflow-x:auto; margin-top:16px; }
 table { border-collapse:collapse; width:100%; font-size:15px; }
-th, td { border:1px solid var(--line); padding:8px 10px; text-align:left; } th { background:var(--card); }
-tr.best td { background:var(--best); font-weight:600; }
-.cols { display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:16px; }
-.box { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; }
-.box h3 { margin:0 0 8px; font-size:17px; }
-code, pre { font-family:ui-monospace, monospace; font-size:14px; }
-pre { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:12px; overflow-x:auto; }
-label { display:inline-flex; gap:8px; align-items:center; margin:8px 0; }
+th, td { border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; }
+thead th { font-size:13px; color:var(--muted); font-weight:600; }
+tbody th { font-weight:500; }
+tr.best th, tr.best td { background:var(--best); font-weight:600; }
+dl.metrics { display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:4px 24px; font-size:14px; margin-top:16px; }
+dl.metrics dt { font-weight:600; margin-top:8px; } dl.metrics dd { margin:0; color:var(--muted); }
+
+.cols { display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:16px; margin-top:16px; }
+.box { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:18px; }
+.box h3 { margin:0 0 8px; font-size:18px; } .box ul { margin:0; padding-left:20px; } .box li { margin:4px 0; }
+
+details { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px 16px; margin-top:12px; }
+summary { cursor:pointer; font-weight:600; }
+code, pre { font-family:ui-monospace, 'SFMono-Regular', monospace; font-size:14px; }
+pre { background:var(--bg); border-radius:8px; padding:12px; overflow-x:auto; }
+footer { margin-top:48px; font-size:13px; color:var(--muted); }
 </style></head>
 <body><main>
-<p class="eyebrow">Computação Gráfica · IFNMG 2026/2 · Prof. Wagner Ferreira de Barros</p>
-<h1>Rios com elevação explícita na síntese de terrenos por iso-contornos</h1>
-<p class="muted">Equipe: Lucas Santos · João Victor · Luis Fhilipe ·
-<a href="https://github.com/lucasrib421/Projeto-Pesquisa-CG-2026">repositório</a> ·
-artigo base: Huftier et al., <a href="https://doi.org/10.1111/cgf.70389"><i>Terrain Synthesis and Authoring based on Iso-Contours</i></a>, CGF 2026</p>
 
-<p class="lead">O artigo gera terrenos como curvas de nível aninhadas: um crescimento (<i>Open Eden Growth</i>) avança da costa para o interior,
-e a ordem de chegada de cada ponto vira a altura. Na seção 6.6, os autores apontam que <b>rios</b> continuam difíceis: só podem ser sugeridos
-pintando um mapa de probabilidade P. A nossa proposta deixa o usuário <b>desenhar o rio com a altura do leito explícita</b>: os pontos do rio
-viram pontos de partida do crescimento, cada um na altura pedida.</p>
+<header class="hero">
+  <p class="kicker">Projeto de pesquisa · Computação Gráfica · IFNMG 2026/2</p>
+  <h1>Rios com elevação explícita</h1>
+  <p class="subtitle">na síntese de terrenos por iso-contornos</p>
+  <p class="team">Lucas Santos, João Victor e Luis Fhilipe · Prof. Wagner Ferreira de Barros</p>
+  <nav class="pills" aria-label="Links">
+    <a class="pill" href="https://doi.org/10.1111/cgf.70389">Artigo base ↗</a>
+    <a class="pill" href="https://github.com/lucasrib421/Projeto-Pesquisa-CG-2026">Código e dados ↗</a>
+  </nav>
+</header>
 
-<h2>Resultado principal</h2>
-<p>Mesma máscara, histograma e ~3000 pontos da Figura 11 do artigo; semente aleatória 239; leito pedido de 0 (foz) a 0,15 (nascente).
-O canal com atraso D = 2 é a primeira variante em que o rio aparece com <b>forma de vale</b>: leito abaixo das duas margens, dentro de um corredor rebaixado.</p>
-<label><input type="checkbox" id="river" checked> Mostrar o traçado do rio (tracejado)</label>
-<div class="grid">
-<figure class="card">
-  <figcaption><strong>Método original</strong><span>Rio pintado no mapa de probabilidade P (Figura 11 do artigo).</span></figcaption>
-  <div class="pic"><img src="results/experiment-river/perfil-baixo/baseline/seed-239/isos.svg" alt="Isolinhas: Método original" class="isos" loading="lazy"><svg viewBox="0 0 1000 1000" class="river" aria-hidden="true"><polyline points="531.7,371.6 531.7,391.1 502.4,430.2 500.5,449.7 506.3,469.2 518.1,488.8 528.8,508.3 537.6,527.8 543.5,547.4 546.4,566.9 550.3,586.4 552.2,606.0 554.2,625.5 556.2,645.0 557.1,664.6 560.1,684.1 563.0,703.6 567.9,723.1 571.8,742.7 569.8,762.2 573.7,781.7 529.8,801.3 516.1,820.8 497.6,840.3 441.9,859.9 429.2,879.4"/></svg></div>
-  <div class="pic"><img src="results/experiment-river/perfil-baixo/baseline/seed-239/terrain.png" alt="Terreno: Método original" loading="lazy"><svg viewBox="0 0 1000 1000" class="river" aria-hidden="true"><polyline points="531.7,371.6 531.7,391.1 502.4,430.2 500.5,449.7 506.3,469.2 518.1,488.8 528.8,508.3 537.6,527.8 543.5,547.4 546.4,566.9 550.3,586.4 552.2,606.0 554.2,625.5 556.2,645.0 557.1,664.6 560.1,684.1 563.0,703.6 567.9,723.1 571.8,742.7 569.8,762.2 573.7,781.7 529.8,801.3 516.1,820.8 497.6,840.3 441.9,859.9 429.2,879.4"/></svg></div>
-</figure>
-<figure class="card">
-  <figcaption><strong>Controle</strong><span>Sem rio e mapa P uniforme: mostra o terreno natural.</span></figcaption>
-  <div class="pic"><img src="results/experiment-delay/perfil-baixo/control/seed-239/isos.svg" alt="Isolinhas: Controle" class="isos" loading="lazy"><svg viewBox="0 0 1000 1000" class="river" aria-hidden="true"><polyline points="531.7,371.6 531.7,391.1 502.4,430.2 500.5,449.7 506.3,469.2 518.1,488.8 528.8,508.3 537.6,527.8 543.5,547.4 546.4,566.9 550.3,586.4 552.2,606.0 554.2,625.5 556.2,645.0 557.1,664.6 560.1,684.1 563.0,703.6 567.9,723.1 571.8,742.7 569.8,762.2 573.7,781.7 529.8,801.3 516.1,820.8 497.6,840.3 441.9,859.9 429.2,879.4"/></svg></div>
-  <div class="pic"><img src="results/experiment-delay/perfil-baixo/control/seed-239/terrain.png" alt="Terreno: Controle" loading="lazy"><svg viewBox="0 0 1000 1000" class="river" aria-hidden="true"><polyline points="531.7,371.6 531.7,391.1 502.4,430.2 500.5,449.7 506.3,469.2 518.1,488.8 528.8,508.3 537.6,527.8 543.5,547.4 546.4,566.9 550.3,586.4 552.2,606.0 554.2,625.5 556.2,645.0 557.1,664.6 560.1,684.1 563.0,703.6 567.9,723.1 571.8,742.7 569.8,762.2 573.7,781.7 529.8,801.3 516.1,820.8 497.6,840.3 441.9,859.9 429.2,879.4"/></svg></div>
-</figure>
-<figure class="card">
-  <figcaption><strong>Canal (nunca espalha)</strong><span>O rio recebe a altura pedida e nunca espalha o crescimento.</span></figcaption>
-  <div class="pic"><img src="results/experiment-delay/perfil-baixo/channel-dnever/seed-239/isos.svg" alt="Isolinhas: Canal (nunca espalha)" class="isos" loading="lazy"><svg viewBox="0 0 1000 1000" class="river" aria-hidden="true"><polyline points="531.7,371.6 531.7,391.1 502.4,430.2 500.5,449.7 506.3,469.2 518.1,488.8 528.8,508.3 537.6,527.8 543.5,547.4 546.4,566.9 550.3,586.4 552.2,606.0 554.2,625.5 556.2,645.0 557.1,664.6 560.1,684.1 563.0,703.6 567.9,723.1 571.8,742.7 569.8,762.2 573.7,781.7 529.8,801.3 516.1,820.8 497.6,840.3 441.9,859.9 429.2,879.4"/></svg></div>
-  <div class="pic"><img src="results/experiment-delay/perfil-baixo/channel-dnever/seed-239/terrain.png" alt="Terreno: Canal (nunca espalha)" loading="lazy"><svg viewBox="0 0 1000 1000" class="river" aria-hidden="true"><polyline points="531.7,371.6 531.7,391.1 502.4,430.2 500.5,449.7 506.3,469.2 518.1,488.8 528.8,508.3 537.6,527.8 543.5,547.4 546.4,566.9 550.3,586.4 552.2,606.0 554.2,625.5 556.2,645.0 557.1,664.6 560.1,684.1 563.0,703.6 567.9,723.1 571.8,742.7 569.8,762.2 573.7,781.7 529.8,801.3 516.1,820.8 497.6,840.3 441.9,859.9 429.2,879.4"/></svg></div>
-</figure>
-<figure class="card best">
-  <figcaption><strong>Canal com atraso D = 2</strong><span>O rio espalha o crescimento 2 níveis de altura depois de ativado.</span></figcaption>
-  <div class="pic"><img src="results/experiment-delay/perfil-baixo/channel-d2/seed-239/isos.svg" alt="Isolinhas: Canal com atraso D = 2" class="isos" loading="lazy"><svg viewBox="0 0 1000 1000" class="river" aria-hidden="true"><polyline points="531.7,371.6 531.7,391.1 502.4,430.2 500.5,449.7 506.3,469.2 518.1,488.8 528.8,508.3 537.6,527.8 543.5,547.4 546.4,566.9 550.3,586.4 552.2,606.0 554.2,625.5 556.2,645.0 557.1,664.6 560.1,684.1 563.0,703.6 567.9,723.1 571.8,742.7 569.8,762.2 573.7,781.7 529.8,801.3 516.1,820.8 497.6,840.3 441.9,859.9 429.2,879.4"/></svg></div>
-  <div class="pic"><img src="results/experiment-delay/perfil-baixo/channel-d2/seed-239/terrain.png" alt="Terreno: Canal com atraso D = 2" loading="lazy"><svg viewBox="0 0 1000 1000" class="river" aria-hidden="true"><polyline points="531.7,371.6 531.7,391.1 502.4,430.2 500.5,449.7 506.3,469.2 518.1,488.8 528.8,508.3 537.6,527.8 543.5,547.4 546.4,566.9 550.3,586.4 552.2,606.0 554.2,625.5 556.2,645.0 557.1,664.6 560.1,684.1 563.0,703.6 567.9,723.1 571.8,742.7 569.8,762.2 573.7,781.7 529.8,801.3 516.1,820.8 497.6,840.3 441.9,859.9 429.2,879.4"/></svg></div>
-</figure></div>
+<section class="summary" aria-label="Resumo">
+  <div><h3>O problema</h3><p>O artigo de Huftier et al. (2026) gera terrenos a partir de curvas de nível, mas os autores apontam que <b>rios continuam difíceis</b>: só podem ser sugeridos pintando um mapa de probabilidade.</p></div>
+  <div><h3>A proposta</h3><p>Deixar o usuário <b>desenhar o rio e dizer a altura do leito</b>. Os pontos do rio passam a ser pontos de partida do crescimento que gera o terreno, cada um na altura pedida.</p></div>
+  <div><h3>O resultado</h3><p>A altura do leito passa a ser controlada, sem criar poças. Com um <b>atraso de 2 níveis</b>, o rio forma um canal dentro de um vale: 86% do leito fica abaixo das duas margens.</p></div>
+</section>
 
-<h2>Números (média de 5 sementes aleatórias)</h2>
+<h2>Como o algoritmo do artigo funciona</h2>
+<p class="intro">Os métodos abaixo são variações deste processo. Entender a "fila de senhas" é o suficiente para acompanhar o resto.</p>
+<div class="steps">
+  <div><h3>Pontos e vizinhos</h3><p>Cerca de 3000 pontos são espalhados pela região e ligados por triângulos. Cada ponto conhece seus vizinhos.</p></div>
+  <div><h3>Fila de senhas</h3><p>A partir da costa, o crescimento sorteia um ponto da frente e dá a <b>próxima senha</b> a um vizinho ainda sem senha. O mapa P deixa o sorteio mais frequente em algumas regiões.</p></div>
+  <div><h3>Senha vira altura</h3><p>Quem recebe senha antes fica mais baixo; um histograma converte a ordem em 12 alturas. Como todo ponto é alcançado a partir de um vizinho mais baixo, <b>nunca se formam poças</b>.</p></div>
+</div>
+
+<h2>Os quatro métodos comparados</h2>
+<p class="intro">Mesma região de costa, histograma e número de pontos da Figura 11 do artigo; semente aleatória 239. O leito pedido vai de 0 (foz, perto da costa) a 0,15 (nascente). Números: média de 5 sementes aleatórias.</p>
+<div class="legend">
+  <span>Isolinhas: <i class="ramp"></i> baixo → alto (branco = mar)</span>
+  <span>Terreno: <i class="gray"></i> baixo → alto (preto = mar)</span>
+  <span><i class="dash"></i> traçado do rio</span>
+  <label><input type="checkbox" id="river" checked> mostrar traçado</label>
+  <span>Ver em todos: <span class="switch" role="group" aria-label="Ver em todos os métodos">
+    <button type="button" data-all="0" aria-pressed="true">Isolinhas</button><button type="button" data-all="1" aria-pressed="false">Terreno</button>
+  </span></span>
+</div>
+<div class="methods">
+<article class="method">
+  <p class="tag">Artigo</p>
+  <h3>Método original</h3>
+  <ul class="badges"><li><b>0%</b><span>leito entalhado</span></li><li><b>+0,16</b><span>corredor rebaixado</span></li><li><b>−0,09</b><span>degrau</span></li></ul>
+  <div class="viewer" data-view="0">
+    <div class="pic"><img src="results/experiment-river/perfil-baixo/baseline/seed-239/isos.svg" alt="Isolinhas: Método original" class="isos" loading="lazy"><svg viewBox="0 0 1000 1000" class="river" aria-hidden="true"><polyline points="531.7,371.6 531.7,391.1 502.4,430.2 500.5,449.7 506.3,469.2 518.1,488.8 528.8,508.3 537.6,527.8 543.5,547.4 546.4,566.9 550.3,586.4 552.2,606.0 554.2,625.5 556.2,645.0 557.1,664.6 560.1,684.1 563.0,703.6 567.9,723.1 571.8,742.7 569.8,762.2 573.7,781.7 529.8,801.3 516.1,820.8 497.6,840.3 441.9,859.9 429.2,879.4"/></svg></div>
+    <div class="pic"><img src="results/experiment-river/perfil-baixo/baseline/seed-239/terrain.png" alt="Terreno: Método original" loading="lazy"><svg viewBox="0 0 1000 1000" class="river" aria-hidden="true"><polyline points="531.7,371.6 531.7,391.1 502.4,430.2 500.5,449.7 506.3,469.2 518.1,488.8 528.8,508.3 537.6,527.8 543.5,547.4 546.4,566.9 550.3,586.4 552.2,606.0 554.2,625.5 556.2,645.0 557.1,664.6 560.1,684.1 563.0,703.6 567.9,723.1 571.8,742.7 569.8,762.2 573.7,781.7 529.8,801.3 516.1,820.8 497.6,840.3 441.9,859.9 429.2,879.4"/></svg></div>
+    <div class="nav">
+      <button type="button" class="prev" aria-label="Imagem anterior">‹</button>
+      <span class="label" aria-live="polite">Isolinhas</span>
+      <button type="button" class="next" aria-label="Próxima imagem">›</button>
+    </div>
+  </div>
+  <h4>Como funciona</h4><p>O rio é <b>pintado no mapa de probabilidade P</b>. O crescimento passa mais rápido por essa faixa, então ela recebe senhas cedo e fica baixa.</p>
+  <h4>O que observar</h4><p>Uma faixa larga de terreno baixo ao longo do rio, sem leito entalhado. Não há como dizer a altura do leito.</p>
+</article>
+<article class="method">
+  <p class="tag">Referência</p>
+  <h3>Controle</h3>
+  <ul class="badges"><li><span>Referência das medidas</span></li></ul>
+  <div class="viewer" data-view="0">
+    <div class="pic"><img src="results/experiment-delay/perfil-baixo/control/seed-239/isos.svg" alt="Isolinhas: Controle" class="isos" loading="lazy"><svg viewBox="0 0 1000 1000" class="river" aria-hidden="true"><polyline points="531.7,371.6 531.7,391.1 502.4,430.2 500.5,449.7 506.3,469.2 518.1,488.8 528.8,508.3 537.6,527.8 543.5,547.4 546.4,566.9 550.3,586.4 552.2,606.0 554.2,625.5 556.2,645.0 557.1,664.6 560.1,684.1 563.0,703.6 567.9,723.1 571.8,742.7 569.8,762.2 573.7,781.7 529.8,801.3 516.1,820.8 497.6,840.3 441.9,859.9 429.2,879.4"/></svg></div>
+    <div class="pic"><img src="results/experiment-delay/perfil-baixo/control/seed-239/terrain.png" alt="Terreno: Controle" loading="lazy"><svg viewBox="0 0 1000 1000" class="river" aria-hidden="true"><polyline points="531.7,371.6 531.7,391.1 502.4,430.2 500.5,449.7 506.3,469.2 518.1,488.8 528.8,508.3 537.6,527.8 543.5,547.4 546.4,566.9 550.3,586.4 552.2,606.0 554.2,625.5 556.2,645.0 557.1,664.6 560.1,684.1 563.0,703.6 567.9,723.1 571.8,742.7 569.8,762.2 573.7,781.7 529.8,801.3 516.1,820.8 497.6,840.3 441.9,859.9 429.2,879.4"/></svg></div>
+    <div class="nav">
+      <button type="button" class="prev" aria-label="Imagem anterior">‹</button>
+      <span class="label" aria-live="polite">Isolinhas</span>
+      <button type="button" class="next" aria-label="Próxima imagem">›</button>
+    </div>
+  </div>
+  <h4>Como funciona</h4><p>Sem rio e com o mapa P uniforme: o crescimento avança igual em toda a região. É o <b>terreno natural</b>, contra o qual o corredor e o degrau são medidos.</p>
+  <h4>O que observar</h4><p>Nenhuma estrutura ao longo do traçado tracejado.</p>
+</article>
+<article class="method">
+  <p class="tag">Proposta</p>
+  <h3>Canal que nunca espalha</h3>
+  <ul class="badges"><li><b>86%</b><span>leito entalhado</span></li><li><b>−0,02</b><span>corredor rebaixado</span></li><li><b>+0,07</b><span>degrau</span></li></ul>
+  <div class="viewer" data-view="0">
+    <div class="pic"><img src="results/experiment-delay/perfil-baixo/channel-dnever/seed-239/isos.svg" alt="Isolinhas: Canal que nunca espalha" class="isos" loading="lazy"><svg viewBox="0 0 1000 1000" class="river" aria-hidden="true"><polyline points="531.7,371.6 531.7,391.1 502.4,430.2 500.5,449.7 506.3,469.2 518.1,488.8 528.8,508.3 537.6,527.8 543.5,547.4 546.4,566.9 550.3,586.4 552.2,606.0 554.2,625.5 556.2,645.0 557.1,664.6 560.1,684.1 563.0,703.6 567.9,723.1 571.8,742.7 569.8,762.2 573.7,781.7 529.8,801.3 516.1,820.8 497.6,840.3 441.9,859.9 429.2,879.4"/></svg></div>
+    <div class="pic"><img src="results/experiment-delay/perfil-baixo/channel-dnever/seed-239/terrain.png" alt="Terreno: Canal que nunca espalha" loading="lazy"><svg viewBox="0 0 1000 1000" class="river" aria-hidden="true"><polyline points="531.7,371.6 531.7,391.1 502.4,430.2 500.5,449.7 506.3,469.2 518.1,488.8 528.8,508.3 537.6,527.8 543.5,547.4 546.4,566.9 550.3,586.4 552.2,606.0 554.2,625.5 556.2,645.0 557.1,664.6 560.1,684.1 563.0,703.6 567.9,723.1 571.8,742.7 569.8,762.2 573.7,781.7 529.8,801.3 516.1,820.8 497.6,840.3 441.9,859.9 429.2,879.4"/></svg></div>
+    <div class="nav">
+      <button type="button" class="prev" aria-label="Imagem anterior">‹</button>
+      <span class="label" aria-live="polite">Isolinhas</span>
+      <button type="button" class="next" aria-label="Próxima imagem">›</button>
+    </div>
+  </div>
+  <h4>Como funciona</h4><p>Cada ponto do rio fica bloqueado até receber a <b>senha da altura pedida</b> e depois <b>nunca</b> é ponto de partida do crescimento. As margens são alcançadas pelo crescimento normal e ficam mais altas que o leito.</p>
+  <h4>O que observar</h4><p>Leito entalhado, mas o rio vira uma <b>parede</b>: o lado leste só é alcançado contornando o rio e fica mais alto (degrau).</p>
+</article>
+<article class="method best">
+  <p class="tag">Proposta · melhor resultado</p>
+  <h3>Canal com atraso D = 2</h3>
+  <ul class="badges"><li><b>86%</b><span>leito entalhado</span></li><li><b>+0,07</b><span>corredor rebaixado</span></li><li><b>−0,06</b><span>degrau</span></li></ul>
+  <div class="viewer" data-view="0">
+    <div class="pic"><img src="results/experiment-delay/perfil-baixo/channel-d2/seed-239/isos.svg" alt="Isolinhas: Canal com atraso D = 2" class="isos" loading="lazy"><svg viewBox="0 0 1000 1000" class="river" aria-hidden="true"><polyline points="531.7,371.6 531.7,391.1 502.4,430.2 500.5,449.7 506.3,469.2 518.1,488.8 528.8,508.3 537.6,527.8 543.5,547.4 546.4,566.9 550.3,586.4 552.2,606.0 554.2,625.5 556.2,645.0 557.1,664.6 560.1,684.1 563.0,703.6 567.9,723.1 571.8,742.7 569.8,762.2 573.7,781.7 529.8,801.3 516.1,820.8 497.6,840.3 441.9,859.9 429.2,879.4"/></svg></div>
+    <div class="pic"><img src="results/experiment-delay/perfil-baixo/channel-d2/seed-239/terrain.png" alt="Terreno: Canal com atraso D = 2" loading="lazy"><svg viewBox="0 0 1000 1000" class="river" aria-hidden="true"><polyline points="531.7,371.6 531.7,391.1 502.4,430.2 500.5,449.7 506.3,469.2 518.1,488.8 528.8,508.3 537.6,527.8 543.5,547.4 546.4,566.9 550.3,586.4 552.2,606.0 554.2,625.5 556.2,645.0 557.1,664.6 560.1,684.1 563.0,703.6 567.9,723.1 571.8,742.7 569.8,762.2 573.7,781.7 529.8,801.3 516.1,820.8 497.6,840.3 441.9,859.9 429.2,879.4"/></svg></div>
+    <div class="nav">
+      <button type="button" class="prev" aria-label="Imagem anterior">‹</button>
+      <span class="label" aria-live="polite">Isolinhas</span>
+      <button type="button" class="next" aria-label="Próxima imagem">›</button>
+    </div>
+  </div>
+  <h4>Como funciona</h4><p>Igual ao anterior, mas <b>2 níveis de altura depois</b> de receber a senha o ponto do rio passa a espalhar o crescimento. Primeiro as margens ficam acima do leito; depois o rio rebaixa o entorno e deixa o crescimento atravessar.</p>
+  <h4>O que observar</h4><p>Canal dentro de um vale mais escuro dos dois lados, <b>sem degrau</b>.</p>
+</article>
+</div>
+
+<h2>Números</h2>
+<p class="intro">Média de 5 sementes aleatórias. A linha "Rio como semente" é a primeira versão da proposta: o rio espalha o crescimento na hora (D = 0) e forma só o corredor, como o método original.</p>
 <div class="tablewrap"><table>
-<thead><tr><th>Variante</th><th>Nós sem vizinho mais baixo</th><th>Erro no leito</th><th>Leito entalhado nos dois lados</th><th>Corredor rebaixado</th><th>Degrau entre margens</th></tr></thead>
-<tbody><tr><td>Método original</td><td>0</td><td>—</td><td>0,0%</td><td>+0,161</td><td>−0,085</td></tr><tr><td>Controle</td><td>0</td><td>—</td><td>0,9%</td><td>—</td><td>—</td></tr><tr><td>Rio como semente</td><td>0</td><td>0,023</td><td>0,4%</td><td>+0,160</td><td>−0,068</td></tr><tr><td>Canal (nunca espalha)</td><td>0</td><td>0,023</td><td>85,9%</td><td>−0,024</td><td>+0,067</td></tr><tr class="best"><td>Canal com atraso D = 2</td><td>0</td><td>0,023</td><td>85,9%</td><td>+0,071</td><td>−0,056</td></tr></tbody></table></div>
-<p class="muted">Alturas normalizadas em [0, 1]; o terreno tem 12 alturas possíveis (passo ≈ 0,09), então o menor erro possível no leito é ≈ 0,023.
-<b>Nós sem vizinho mais baixo</b> = 0 significa que a garantia do artigo (sem bacias endorreicas) se mantém.
-<b>Corredor</b> e <b>degrau</b> são medidos em relação ao controle, com as mesmas sementes.</p>
+<thead><tr><th scope="col">Método</th><th scope="col">Pontos sem vizinho mais baixo</th><th scope="col">Erro no leito</th><th scope="col">Leito entalhado</th><th scope="col">Corredor rebaixado</th><th scope="col">Degrau</th></tr></thead>
+<tbody><tr><th scope="row">Método original</th><td>0</td><td>—</td><td>0,0%</td><td>+0,161</td><td>−0,085</td></tr><tr><th scope="row">Controle</th><td>0</td><td>—</td><td>0,9%</td><td>—</td><td>—</td></tr><tr><th scope="row">Rio como semente (D = 0)</th><td>0</td><td>0,023</td><td>0,4%</td><td>+0,160</td><td>−0,068</td></tr><tr><th scope="row">Canal que nunca espalha</th><td>0</td><td>0,023</td><td>85,9%</td><td>−0,024</td><td>+0,067</td></tr><tr class="best"><th scope="row">Canal com atraso D = 2</th><td>0</td><td>0,023</td><td>85,9%</td><td>+0,071</td><td>−0,056</td></tr></tbody></table></div>
+<dl class="metrics">
+  <div><dt>Pontos sem vizinho mais baixo</dt><dd>Lugares de onde a água não teria para onde escoar. Zero significa que a garantia do artigo (sem poças) se mantém.</dd></div>
+  <div><dt>Erro no leito</dt><dd>Diferença entre a altura pedida e a gerada, em alturas de 0 a 1. Com 12 alturas possíveis, o menor erro possível é ≈ 0,023.</dd></div>
+  <div><dt>Leito entalhado</dt><dd>Porcentagem dos pontos do rio pelo menos um nível abaixo das duas margens (20 a 60 m de distância): a forma de vale.</dd></div>
+  <div><dt>Corredor rebaixado</dt><dd>Quanto a faixa de 0 a 60 m em volta do rio ficou mais baixa que no controle.</dd></div>
+  <div><dt>Degrau</dt><dd>Quanto uma margem ficou mais alta que a outra, além da diferença que já existe no terreno natural.</dd></div>
+</dl>
 
+<h2>O que aprendemos</h2>
 <div class="cols">
-<div class="box"><h3>O que aprendemos</h3><ul>
-<li>A proposta controla a altura do leito (erro no piso de quantização) sem criar poças.</li>
-<li>Se o rio espalha o crescimento na hora, ele "puxa" as margens junto: o terreno desce num corredor largo, mas sem forma de vale. O método original faz o mesmo (entalhe 0,0%).</li>
-<li>Se o rio nunca espalha, o leito fica entalhado (85,9%), mas os pontos do rio viram uma parede e criam um degrau entre as margens (+0,067).</li>
-<li>Com um atraso de 2 níveis, os dois efeitos se combinam: entalhe de 85,9%, corredor +0,071 e sem degrau.</li>
+<div class="box"><h3>Aprendizados</h3><ul>
+<li>A proposta controla a altura do leito (erro no mínimo possível) sem criar poças.</li>
+<li>Se o rio espalha o crescimento na hora, ele "puxa" as margens junto: o terreno desce num corredor largo, sem forma de vale. O método original faz o mesmo (leito entalhado: 0%).</li>
+<li>Se o rio nunca espalha, o leito fica entalhado (86%), mas o rio vira parede e cria um degrau (+0,07).</li>
+<li>Com atraso de 2 níveis, os dois efeitos se combinam: entalhe de 86%, corredor +0,07 e degrau −0,06.</li>
 </ul></div>
 <div class="box"><h3>Limitações e próximos passos</h3><ul>
 <li>O canal tem a largura de um ponto do grafo (~17 m); o rio da Figura 11 tem ~50 m.</li>
-<li>Um único traçado (braço esquerdo do rio da Figura 11) e perfis de leito escolhidos pela equipe.</li>
-<li>Métricas medidas nas 12 alturas do grafo; área de drenagem e ordem de Strahler ainda não medidas.</li>
-<li>Os resultados de várias métricas iniciais estavam errados e foram corrigidos; o histórico está no repositório.</li>
+<li>Um único traçado de rio e perfis de leito escolhidos pela equipe.</li>
+<li>Medidas nas 12 alturas do grafo; área de drenagem e ordem de Strahler ainda não medidas.</li>
+<li>Algumas métricas iniciais estavam erradas e foram corrigidas; o histórico está no repositório.</li>
 </ul></div>
 </div>
 
-<h2>Explorar</h2>
-<ul>
+<h2>Explorar e reproduzir</h2>
+<details><summary>Páginas interativas e dados</summary><ul>
 <li><a href="results/experiment-delay/index.html">Varredura do atraso D</a>: todas as variantes de canal, por perfil e semente.</li>
-<li><a href="results/experiment-river/index.html">Experimento do rio</a>: baseline, controle, reserve, passive e channel, em 3 perfis de leito.</li>
+<li><a href="results/experiment-river/index.html">Experimento do rio</a>: método original, controle e as variantes da proposta, em 3 perfis de leito.</li>
 <li><a href="results/baseline/fig11/river_isos.svg">Baseline reproduzida</a>: Figura 11 do artigo gerada pelo código original.</li>
 <li><a href="https://github.com/lucasrib421/Projeto-Pesquisa-CG-2026#readme">README</a>: métodos, métricas, decisões e uso de ferramentas de IA.</li>
-</ul>
-
-<h2>Reproduzir</h2>
+</ul></details>
+<details><summary>Como reproduzir</summary>
 <p>Ubuntu (testado no WSL2), Qt 6, GLEW e CMake; detalhes no README.</p>
 <pre><code>bash scripts/setup.sh              # compila
 bash scripts/baseline-fig11.sh     # baseline: Figura 11 do artigo
 bash scripts/experiment-river.sh   # experimento do rio (~10 min)
 bash scripts/experiment-delay.sh   # varredura do atraso (~8 min)
 python3 scripts/site_page.py       # regenera esta página</code></pre>
-<p class="muted">Página gerada por <code>scripts/site_page.py</code> a partir dos arquivos <code>summary.csv</code>.</p>
+</details>
+
+<footer>Página gerada por <code>scripts/site_page.py</code> a partir dos arquivos <code>summary.csv</code> dos experimentos.</footer>
 </main>
 <script>
 document.getElementById('river').addEventListener('change', e => document.body.classList.toggle('hide-river', !e.target.checked));
+const labels = ['Isolinhas', 'Terreno'];
+function show(viewer, i) {
+  viewer.dataset.view = i;
+  viewer.querySelector('.label').textContent = labels[i];
+}
+document.querySelectorAll('.viewer').forEach(v => {
+  v.querySelector('.prev').addEventListener('click', () => show(v, (+v.dataset.view + 1) % 2));
+  v.querySelector('.next').addEventListener('click', () => show(v, (+v.dataset.view + 1) % 2));
+});
+document.querySelectorAll('[data-all]').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.viewer').forEach(v => show(v, +b.dataset.all));
+  document.querySelectorAll('[data-all]').forEach(x => x.setAttribute('aria-pressed', x === b));
+}));
 </script>
 </body></html>
