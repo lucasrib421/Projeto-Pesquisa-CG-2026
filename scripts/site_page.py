@@ -18,6 +18,7 @@ RIVER_DIR = REPO / 'results' / 'experiment-river' / PROFILE
 DELAY_DIR = REPO / 'results' / 'experiment-delay' / PROFILE
 PAPER_URL = 'https://doi.org/10.1111/cgf.70389'
 REPO_URL = 'https://github.com/lucasrib421/Projeto-Pesquisa-CG-2026'
+SLIDES_URL = 'https://claude.ai/artifact/1UBaWMzWhfY5voAZN24pEk'
 
 
 def load(path):
@@ -235,6 +236,7 @@ footer {{ margin-top:48px; font-size:13px; color:var(--muted); }}
   <nav class="pills" aria-label="Links">
     <a class="pill" href="{PAPER_URL}">Artigo base ↗</a>
     <a class="pill" href="{REPO_URL}">Código e dados ↗</a>
+    <a class="pill" href="{SLIDES_URL}">Slides do Checkpoint 2 ↗</a>
   </nav>
 </header>
 

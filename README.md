@@ -6,6 +6,8 @@ Projeto de Pesquisa da disciplina de Computação Gráfica (IFNMG, 2026/2). Prof
 
 **Página de resultados:** https://lucasrib421.github.io/Projeto-Pesquisa-CG-2026/ (gerada por `scripts/site_page.py`)
 
+**Slides do Checkpoint 2:** https://claude.ai/artifact/1UBaWMzWhfY5voAZN24pEk
+
 ## Artigo base
 
 B. Huftier, H. Schott, E. Galin, O. Argudo, A. Peytavie, E. Guérin. *Terrain Synthesis and Authoring based on Iso-Contours*. Computer Graphics Forum 45(2), 2026. DOI: [10.1111/cgf.70389](https://doi.org/10.1111/cgf.70389). Código original: [Arches-Team/Contours](https://github.com/Arches-Team/Contours).
