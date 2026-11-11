@@ -15,7 +15,8 @@ O método gera terrenos como conjuntos aninhados de curvas de nível. Um crescim
 Na seção 6.6, os autores apontam que gerar rios com largura e inclinação variáveis continua sendo um desafio: hoje o rio só pode ser sugerido pelo mapa de probabilidade P ou por várias regiões desenhadas à mão. A proposta da equipe é permitir que o usuário desenhe o rio com a **elevação do leito explícita**. Os pontos do grafo sobre o rio passam a ser sementes extras do crescimento, ativadas quando ele atinge a elevação prescrita.
 
 - **Baseline:** o método original, com o rio definido pelo mapa P (Figura 11 do artigo).
-- **Métricas:** erro de elevação no leito, número de bacias endorreicas, área de drenagem, ordem de Strahler e tempo de geração.
+- **Métricas medidas:** erro de elevação no leito, nós sem vizinho mais baixo (garantia de não haver bacias endorreicas), forma do vale (leito entalhado nos dois lados, rebaixamento do corredor, degrau entre as margens) e tempo de geração.
+- **Métricas planejadas, ainda não medidas:** área de drenagem e ordem de Strahler.
 
 ## Estrutura do repositório
 
@@ -71,7 +72,7 @@ Para o uso da interface, veja [contours/TUTORIAL.md](contours/TUTORIAL.md).
 bash scripts/baseline-fig11.sh
 ```
 
-Gera em `results/baseline/fig11/` a Figura 11 do artigo: um rio definido pelo mapa de probabilidade P, comparado com um mapa uniforme. Leva cerca de 8 s. Parâmetros (definidos em `GenerateFigure11`): domínio `Box2(500)` (de −500 a 500, 1000 unidades de lado), ~3000 partículas, 12 isolinhas, máscara `Images/input/mask.png`, mapa P `Images/input/proba.png` (expoente 4), histograma de `Data/dems/rockies_zoom_breach.png`. Gerador aleatório com semente 239 (padrão do código) e `QT_HASH_SEED=0`: execuções repetidas geram arquivos idênticos.
+Gera em `results/baseline/fig11/` a Figura 11 do artigo: um rio definido pelo mapa de probabilidade P, comparado com um mapa uniforme. Leva cerca de 8 s. Parâmetros (definidos em `GenerateFigure11`): domínio `Box2(500)` (de −500 a 500 m, 1 km de lado; a unidade interna é o metro), ~3000 partículas, 12 isolinhas, máscara `Images/input/mask.png`, mapa P `Images/input/proba.png` (expoente 4), histograma de `Data/dems/rockies_zoom_breach.png`. Gerador aleatório com semente 239 (padrão do código) e `QT_HASH_SEED=0`: execuções repetidas geram arquivos idênticos.
 
 | Arquivo | Conteúdo |
 |---|---|
@@ -222,6 +223,7 @@ git diff original -- contours/
 | Claude Code | Rascunho dos slides do Checkpoint 1 | Revisão e apresentação pela equipe |
 | Claude Code | Modo em lote, correção dos caminhos, diagnóstico da não reprodutibilidade (`QT_HASH_SEED`) e script da baseline | Execuções repetidas com comparação byte a byte dos arquivos gerados |
 | Claude Code | Implementação da proposta (rio como semente), scripts do experimento e das métricas, página de comparação | Teste de fidelidade (modo `baseline` gera isolinhas idênticas às da Figura 11 original); execução com 5 sementes |
+| Claude Code | Variantes `control`, `channel` e espalhamento atrasado; métricas de forma do vale; análise dos resultados; material de estudo e relatório da implementação para o NotebookLM | Testes de sanidade byte a byte (`--spread-delay 0` idêntico à `reserve`; sem atraso idêntico ao `channel`); comparação das métricas com as imagens pela equipe, que identificou métricas enganosas depois corrigidas |
 | NotebookLM (Google) | Organização e estudo do artigo | Conferência com o texto do artigo |
 
 As decisões de projeto (escolha do problema, proposta, métricas) foram tomadas pela equipe.
