@@ -4,6 +4,8 @@ Projeto de Pesquisa da disciplina de Computação Gráfica (IFNMG, 2026/2). Prof
 
 **Equipe:** Lucas Santos · João Victor · Luis Fhilipe
 
+**Página de resultados:** https://lucasrib421.github.io/Projeto-Pesquisa-CG-2026/ (gerada por `scripts/site_page.py`)
+
 ## Artigo base
 
 B. Huftier, H. Schott, E. Galin, O. Argudo, A. Peytavie, E. Guérin. *Terrain Synthesis and Authoring based on Iso-Contours*. Computer Graphics Forum 45(2), 2026. DOI: [10.1111/cgf.70389](https://doi.org/10.1111/cgf.70389). Código original: [Arches-Team/Contours](https://github.com/Arches-Team/Contours).
@@ -31,6 +33,7 @@ scripts/
   compare_page.py  página HTML de comparação lado a lado
   make_profile.py  gera o perfil de leito que acompanha o terreno
   experiment-delay.sh  varredura do atraso de espalhamento do modo channel
+  site_page.py   gera index.html, a página de resultados (GitHub Pages)
 experiments/     entradas dos experimentos (traçado do rio em CSV, três perfis)
 results/         resultados dos experimentos
 build/           saída da compilação (não versionada)
